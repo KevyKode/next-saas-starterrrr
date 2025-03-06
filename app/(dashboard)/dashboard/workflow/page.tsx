@@ -14,7 +14,7 @@ export default function Workflow() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!story.trim()) {
-            setError('Please enter a story');
+            setError('Please enter a public company');
             return;
         }
         setError('');
@@ -36,10 +36,10 @@ export default function Workflow() {
                 setResult(data);
                 setError('');
             } else {
-                setError(data.error || 'An error occurred while fetching the story.');
+                setError(data.error || 'An error occurred while finding the data.');
             }
         } catch (err) {
-            setError('An error occurred while fetching the story.');
+            setError('An error occurred while fetching the data.');
         } finally {
             setLoading(false);
         }
@@ -63,7 +63,7 @@ export default function Workflow() {
                 <div className="text-center mb-8 p-8">
                     <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text inline-block" 
                         style={{ lineHeight: '1.5', padding: '0.5em 0' }}>
-                        AI Story Generator - Workflow
+                        AI Warren Buffet Stock Picker - Workflow
                     </h1>
                 </div>
 
@@ -72,7 +72,7 @@ export default function Workflow() {
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
                                 <label htmlFor="story" className="block text-lg font-medium text-gray-700">
-                                    Enter your story prompt:
+                                    See if Warren Buffet would buy, sell, or hold a company:
                                 </label>
                                 <WorkflowHistoryDrawer onSelectHistory={handleSelectHistory} />
                             </div>
@@ -81,7 +81,7 @@ export default function Workflow() {
                                 type="text"
                                 value={story}
                                 onChange={(e) => setStory(e.target.value)}
-                                placeholder="E.g., Tell me a story about a magical forest..."
+                                placeholder="E.g., Would Warren buy Apple stock..."
                                 className="w-full p-4 rounded-lg bg-white/50 border border-purple-200 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent shadow-inner"
                             />
                         </div>
@@ -99,7 +99,7 @@ export default function Workflow() {
                                     Generating...
                                 </span>
                             ) : (
-                                'Generate Story'
+                                'Generate Report'
                             )}
                         </button>
                     </form>
