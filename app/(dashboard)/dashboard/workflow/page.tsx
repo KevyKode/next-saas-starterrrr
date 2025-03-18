@@ -7,6 +7,9 @@ import { WorkflowHistoryDrawer } from '@/components/workflow/WorkflowHistoryDraw
 
 export default function Workflow() {
     // State management for all form fields
+    const [result, setResult] = useState<any>(null);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         problem_description: '',
         target_audience: '',
@@ -36,12 +39,8 @@ export default function Workflow() {
         monthly_burn_rate: ''
     });
 
-    const [result, setResult] = useState<any>(null);
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-
     // Handle input changes
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -98,7 +97,7 @@ export default function Workflow() {
                 <div className="text-center mb-8 p-8">
                     <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text inline-block" 
                         style={{ lineHeight: '1.5', padding: '0.5em 0' }}>
-                        ITT Business Analysis Form
+                        ITT Business Analysis Report
                     </h1>
                 </div>
 
@@ -107,24 +106,25 @@ export default function Workflow() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Problem Description */}
                             <div className="col-span-2">
-                                <label className="block text-lg font-medium text-gray-700 mb-2">
-                                    Problem Description:
-                                </label>
-                                <input
-                                    name="problem_description"
-                                    value={formData.problem_description}
-                                    onChange={handleInputChange}
-                                    className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
-                                    placeholder="In a few sentences, describe the problem you are solving."
-                                />
-                            </div>
+                <label className="block text-lg font-medium text-gray-700 mb-2">
+                    Problem Description:
+                </label>
+                <textarea
+                    name="problem_description"
+                    value={formData.problem_description}
+                    onChange={handleInputChange}
+                    className="w-full p-4 rounded-lg bg-white/50 border border-purple-200 resize-y min-h-[100px]"
+                    placeholder="In a few sentences, describe the problem you are solving."
+                    rows={4}
+                />
+            </div>
 
                             {/* Target Audience */}
                             <div>
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Target Audience:
                                 </label>
-                                <input
+                                <textarea
                                     name="target_audience"
                                     value={formData.target_audience}
                                     onChange={handleInputChange}
@@ -138,7 +138,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Current Solutions:
                                 </label>
-                                <input
+                                <textarea
                                     name="current_solutions"
                                     value={formData.current_solutions}
                                     onChange={handleInputChange}
@@ -151,7 +151,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Product Stage:
                                 </label>
-                                <input
+                                <textarea
                                     name="product_stage"
                                     value={formData.product_stage}
                                     onChange={handleInputChange}
@@ -164,12 +164,12 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Frustration Cost:
                                 </label>
-                                <input
+                                <textarea
                                     name="frustration_cost"
                                     value={formData.frustration_cost}
                                     onChange={handleInputChange}
                                     className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
-                                    placeholder="What’s the biggest frustration or cost associated with this problem??"
+                                    placeholder="What’s the biggest frustration or cost associated with this problem?"
                                 />
                             </div>
 
@@ -177,25 +177,49 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Problem Frequency:
                                 </label>
-                                <input
+                                <select
                                     name="problem_frequency"
                                     value={formData.problem_frequency}
                                     onChange={handleInputChange}
                                     className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
-                                    placeholder="How frequently do they face this problem? (Daily, Weekly, Monthly, Occasionally)?"
-                                />
+                                    >
+                                        <option value="" disabled hidden>Select</option>
+                                        <option value="Daily">Daily</option>
+                                        <option value="Weekly">Weekly</option>
+                                        <option value="Monthly">Monthly</option>
+                                        <option value="Seasonally">Seasonally</option>
+                                        <option value="Occasionally">Occasionally</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-lg font-medium text-gray-700 mb-2">
+                                    Customer Location:
+                                </label>
+                                <select
+                                    name="customer_location"
+                                    value={formData.customer_location}
+                                    onChange={handleInputChange}
+                                    className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
+                                >
+                                    <option value="" disabled hidden>Select</option>
+                                    <option value="Local">Local</option>
+                                    <option value="National">National</option>
+                                    <option value="Global">Global</option>
+                                   
+                                </select>
                             </div>
 
                             <div>
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Customer Feedback:
                                 </label>
-                                <input
+                                <textarea
                                     name="customer_feedback"
                                     value={formData.customer_feedback}
                                     onChange={handleInputChange}
                                     className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
-                                    placeholder="Have you spoken to potential customers about this problem? What did they say??"
+                                    placeholder="Have you spoken to potential customers about this problem? What did they say?"
                                 />
                             </div>
 
@@ -204,7 +228,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Ideal Customer:
                                 </label>
-                                <input
+                                <textarea
                                     name="ideal_customer_description"
                                     value={formData.ideal_customer_description}
                                     onChange={handleInputChange}
@@ -217,25 +241,12 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Industry Sector:
                                 </label>
-                                <input
+                                <textarea
                                     name="industry_sector"
                                     value={formData.industry_sector}
                                     onChange={handleInputChange}
                                     className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
-                                    placeholder="What industry or sector do they belong to?"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-lg font-medium text-gray-700 mb-2">
-                                    Customer Location:
-                                </label>
-                                <input
-                                    name="customer_location"
-                                    value={formData.customer_location}
-                                    onChange={handleInputChange}
-                                    className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
-                                    placeholder="Where are they located? (Local, National, Global)"
+                                    placeholder="What industry or sector is your business in?"
                                 />
                             </div>
 
@@ -243,7 +254,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Price Range:
                                 </label>
-                                <input
+                                <textarea
                                     name="willingness_to_pay"
                                     value={formData.willingness_to_pay}
                                     onChange={handleInputChange}
@@ -254,10 +265,10 @@ export default function Workflow() {
 
                             <div>
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
-                                    Exisiting Competitors:
+                                    Existing Competitors:
                                 </label>
-                                <input
-                                    name="exsisting_competitors"
+                                <textarea
+                                    name="existing_competitors"
                                     value={formData.existing_competitors}
                                     onChange={handleInputChange}
                                     className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
@@ -269,7 +280,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Market Trends:
                                 </label>
-                                <input
+                                <textarea
                                     name="market_trends"
                                     value={formData.market_trends}
                                     onChange={handleInputChange}
@@ -282,7 +293,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Revenue Model:
                                 </label>
-                                <input
+                                <textarea
                                     name="revenue_model"
                                     value={formData.revenue_model}
                                     onChange={handleInputChange}
@@ -295,7 +306,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Pricing Feedback:
                                 </label>
-                                <input
+                                <textarea
                                     name="pricing_feedback"
                                     value={formData.pricing_feedback}
                                     onChange={handleInputChange}
@@ -308,12 +319,12 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Customer Acquistion:
                                 </label>
-                                <input
-                                    name="customer_acquistion_strategy"
+                                <textarea
+                                    name="customer_acquisition_strategy"
                                     value={formData.customer_acquisition_strategy}
                                     onChange={handleInputChange}
                                     className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
-                                    placeholder="How will you acquire your first 100 customers?"
+                                    placeholder="How will you acquire your first 100 customers?(If you already have 100+ customers, explain how you got them.)"
                                 />
                             </div>
 
@@ -321,8 +332,8 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Purchase Frequency:
                                 </label>
-                                <input
-                                    name="purchase_frequency_expectations"
+                                <textarea
+                                    name="purchase_frequency_expectation"
                                     value={formData.purchase_frequency_expectation}
                                     onChange={handleInputChange}
                                     className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
@@ -334,7 +345,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Current Users:
                                 </label>
-                                <input
+                                <textarea
                                     name="current_users_count"
                                     value={formData.current_users_count}
                                     onChange={handleInputChange}
@@ -347,7 +358,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Early User Feedback:
                                 </label>
-                                <input
+                                <textarea
                                     name="early_user_feedback"
                                     value={formData.early_user_feedback}
                                     onChange={handleInputChange}
@@ -360,9 +371,9 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Product Improvements:
                                 </label>
-                                <input
+                                <textarea
                                     name="product_improvements"
-                                    value={formData.early_user_feedback}
+                                    value={formData.product_improvements}
                                     onChange={handleInputChange}
                                     className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
                                     placeholder="Have you made any product improvements based on user feedback?"
@@ -373,7 +384,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Top Competitors:
                                 </label>
-                                <input
+                                <textarea
                                     name="top_competitors"
                                     value={formData.top_competitors}
                                     onChange={handleInputChange}
@@ -386,7 +397,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Your X Factor:
                                 </label>
-                                <input
+                                <textarea
                                     name="differentiation_strategy"
                                     value={formData.differentiation_strategy}
                                     onChange={handleInputChange}
@@ -399,7 +410,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Intellectual Property:
                                 </label>
-                                <input
+                                <textarea
                                     name="intellectual_property"
                                     value={formData.intellectual_property}
                                     onChange={handleInputChange}
@@ -412,7 +423,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Funding Status:
                                 </label>
-                                <input
+                                <textarea
                                     name="funding_status"
                                     value={formData.funding_status}
                                     onChange={handleInputChange}
@@ -425,7 +436,7 @@ export default function Workflow() {
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Operational Funds:
                                 </label>
-                                <input
+                                <textarea
                                     name="operational_funds"
                                     value={formData.operational_funds}
                                     onChange={handleInputChange}
@@ -433,42 +444,24 @@ export default function Workflow() {
                                     placeholder="How much money do you currently have to operate your start-up?"
                                 />
                             </div>
-
-                            <div>
-                                <label className="block text-lg font-medium text-gray-700 mb-2">
-                                    Monthly Burn Rate:
-                                </label>
-                                <input
-                                    name="monthly_burn_rate"
-                                    value={formData.monthly_burn_rate}
-                                    onChange={handleInputChange}
-                                    className="w-110 p-4 rounded-lg bg-white/50 border border-purple-200"
-                                    placeholder="What is your estimated monthly burn rate (if known)?"
-                                />
-                            </div>
-                            {/* Continue with all other fields... */}
-                            {/* I'll continue with the rest of the fields in the next message due to length */}
-
-                            <div className="col-span-2">
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="w-full py-4 px-6 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {loading ? (
-                                        <span className="flex items-center justify-center">
-                                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Processing...
-                                        </span>
-                                    ) : (
-                                        'Generate ITT Business Analysis Report'
-                                    )}
-                                </button>
-                            </div>
                         </div>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-4 px-6 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <span className="flex items-center justify-center">
+                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Generating...
+                                </span>
+                            ) : (
+                                'Generate Report'
+                            )}
+                        </button>
                     </form>
                 </div>
 
