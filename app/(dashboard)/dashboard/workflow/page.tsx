@@ -40,7 +40,7 @@ export default function Workflow() {
     });
 
     // Handle input changes
-    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
