@@ -12,7 +12,7 @@ interface StoryDisplayProps {
 export default function StoryDisplay({ result }: StoryDisplayProps) {
     const [formattedResult, setFormattedResult] = useState('');
     const [debugInfo, setDebugInfo] = useState('');
-    const [reportTitle, setReportTitle] = useState('');
+    const [reportTitle, setReportTitle] = useState('ITT Business-Readiness Report');
     const [reportDate, setReportDate] = useState('');
     const [readinessScore, setReadinessScore] = useState('');
     const [sections, setSections] = useState<{title: string; score?: string; content: string}[]>([]);
@@ -23,32 +23,34 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
         try {
             // Check if we have the expected data structure
             if (result && result.result) {
-                console.log('Found result.result, parsing as markdown...');
+                console.log('Found result.result, processing...');
                 
-                // Check if the result is actually markdown or if it's HTML
+                // Clean up the content
                 let content = result.result.trim();
                 
-                // Clean up the content: remove <think> tag and set proper title
-                content = content.replace(/<think>\s*/, '');
-                content = content.replace(/^\*\*\s*March \d+, \d+/, 'ITT Business-Readiness Report\n\nDate: $&');
+                // Remove <think> tag if present
+                content = content.replace(/<think>[\s\S]*?<\/think>|<think>[\s\S]*/g, '');
                 
-                if (content.startsWith('<') && content.includes('</')) {
-                    // Seems to be HTML, no need to parse with marked
-                    console.log('Content appears to be HTML, using directly');
-                    setFormattedResult(content);
-                } else {
-                    // Parse as markdown
-                    const parser = new marked.Parser();
-                    const lexer = new marked.Lexer();
-                    
-                    const tokens = lexer.lex(content);
-                    const htmlContent = parser.parse(tokens);
-                    console.log('Markdown parsed successfully');
-                    setFormattedResult(htmlContent);
+                // If content is still empty after removing think tag, use the original content
+                if (!content.trim()) {
+                    content = result.result.trim();
+                    content = content.replace(/<think>\s*/, '');
                 }
                 
-                // Process the report for structured display
-                processReport(content);
+                // Replace the title if needed
+                if (content.match(/^\*\*\s*March \d+, \d+/) || content.match(/^Start-Up Readiness Report/)) {
+                    content = content.replace(/^[\s\S]*?(Start-Up Readiness Report|March \d+, \d+)/, 'ITT Business-Readiness Report\n\nDate: $1');
+                }
+                
+                console.log('Cleaned content start:', content.substring(0, 200));
+                
+                // Parse as markdown for display
+                const htmlContent = marked.parse(content);
+                setFormattedResult(htmlContent);
+                
+                // Extract data for structured display
+                parseReportContent(content);
+                
                 setDebugInfo('');
             } else {
                 console.error('Invalid result format:', result);
@@ -62,12 +64,10 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
         }
     }, [result]);
     
-    // Function to process and extract structured data from the report
-    const processReport = (content: string) => {
+    // Improved parsing function to extract all sections
+    const parseReportContent = (content: string) => {
         try {
-            console.log('Processing report content:', content.substring(0, 200));
-            
-            // Set default title if none is found
+            // Set default title
             setReportTitle('ITT Business-Readiness Report');
             
             // Extract date
@@ -87,78 +87,132 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
                 setReadinessScore(scoreMatch[1].replace(/\*\*/g, ''));
             }
             
-            // Find all section headers and their scores
-            const sections: {title: string; score?: string; content: string}[] = [];
+            // Split the content into sections using a simpler approach
+            // This uses the actual structure of the document we're seeing
             
-            // Try different section patterns to find the right one
-            const sectionPatterns = [
-                // Pattern 1: ## Section Name (Score: X/Y)
-                /#{2,3}\s*([^(\n]+)(?:\(Score:\s*([^)]+)\))?\s*\n([\s\S]*?)(?=#{2,3}|$)/g,
+            // First, remove the header part to focus on sections
+            const headerEndIndex = content.indexOf('Problem-Solution Fit') > -1 
+                ? content.indexOf('Problem-Solution Fit') 
+                : content.indexOf('Market Opportunity');
                 
-                // Pattern 2: Section Name (Score: X/Y)
-                /([A-Z][^(:\n]+)(?:\(Score:\s*([^)]+)\))?:?\s*\n([\s\S]*?)(?=[A-Z][^(:\n]+(?:\([^)]+\))?:?\s*\n|$)/g,
-                
-                // Pattern 3: Section Name:
-                /([A-Z][^:\n]+):\s*\n([\s\S]*?)(?=[A-Z][^:\n]+:\s*\n|$)/g
+            if (headerEndIndex === -1) {
+                // Fallback to original content if we can't find section markers
+                const extractedSections = [{
+                    title: 'Report Content',
+                    content: content
+                }];
+                setSections(extractedSections);
+                return;
+            }
+            
+            const headerContent = content.substring(0, headerEndIndex);
+            const sectionsContent = content.substring(headerEndIndex);
+            
+            // Now divide into sections - look for section titles which are usually followed by "(Score: X/Y)"
+            // or are standalone lines with capital first letter
+            const extractedSections: {title: string; score?: string; content: string}[] = [];
+            
+            // These are the section titles we expect to find
+            const expectedSections = [
+                'Problem-Solution Fit',
+                'Market Opportunity',
+                'Business Model Viability',
+                'Product Readiness & Traction',
+                'Competitive Landscape',
+                'Financial & Fundability Metrics',
+                'Conclusion & Next Steps'
             ];
             
-            let foundSections = false;
+            // Find all section starts
+            const sectionStarts: {index: number; title: string; score?: string}[] = [];
             
-            for (const pattern of sectionPatterns) {
-                const matches = Array.from(content.matchAll(pattern));
-                if (matches.length > 0) {
-                    foundSections = true;
-                    for (const match of matches) {
-                        sections.push({
-                            title: match[1].trim(),
-                            score: match[2]?.trim(),
-                            content: match[match.length - 1].trim()
-                        });
-                    }
-                    break;
+            for (const sectionTitle of expectedSections) {
+                const regex = new RegExp(`${sectionTitle}\\s*(?:\\(Score:\\s*([^\\)]+)\\))?`, 'i');
+                const match = regex.exec(sectionsContent);
+                if (match) {
+                    sectionStarts.push({
+                        index: match.index,
+                        title: sectionTitle,
+                        score: match[1]
+                    });
                 }
             }
             
-            // If no sections found, try to split by lines starting with uppercase letters
-            if (!foundSections) {
-                console.log('No sections found with regex patterns, trying manual split');
-                const lines = content.split('\n');
+            // Sort by index to maintain order
+            sectionStarts.sort((a, b) => a.index - b.index);
+            
+            // Extract section content
+            for (let i = 0; i < sectionStarts.length; i++) {
+                const start = sectionStarts[i];
+                const end = i < sectionStarts.length - 1 ? sectionStarts[i + 1].index : sectionsContent.length;
+                
+                const sectionContent = sectionsContent.substring(start.index, end).trim();
+                
+                // Remove the section title from content
+                const contentStart = sectionContent.indexOf('\n');
+                const cleanContent = contentStart > -1 ? sectionContent.substring(contentStart + 1).trim() : sectionContent;
+                
+                extractedSections.push({
+                    title: start.title,
+                    score: start.score,
+                    content: cleanContent
+                });
+            }
+            
+            // If we didn't find any sections, try a different approach
+            if (extractedSections.length === 0) {
+                console.log('No sections found with expected titles, falling back to manual parsing');
+                
+                // Split by lines and look for potential section headers
+                const lines = sectionsContent.split('\n');
                 let currentSection = '';
+                let currentScore = '';
                 let currentContent = '';
+                let inSection = false;
                 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
-                    if (line && /^[A-Z]/.test(line) && line.length < 100 && (line.endsWith(':') || line.includes('(Score:'))) {
-                        // This looks like a section header
-                        if (currentSection) {
-                            // Save the previous section
-                            sections.push({
-                                title: currentSection.replace(/:\s*$/, ''),
+                    
+                    // Check if this looks like a section header
+                    if (line && /^[A-Z][a-zA-Z\s&]+/.test(line) && line.length < 100) {
+                        // This might be a section header
+                        
+                        // Save previous section if we have one
+                        if (currentSection && inSection) {
+                            extractedSections.push({
+                                title: currentSection,
+                                score: currentScore,
                                 content: currentContent.trim()
                             });
                         }
                         
-                        currentSection = line;
+                        // Start new section
+                        const scoreMatch = line.match(/\(Score:\s*([^)]+)\)/);
+                        currentScore = scoreMatch ? scoreMatch[1].trim() : '';
+                        currentSection = line.replace(/\(Score:\s*[^)]+\)/, '').trim();
                         currentContent = '';
-                    } else if (currentSection) {
+                        inSection = true;
+                    } else if (inSection) {
+                        // Add to current section content
                         currentContent += line + '\n';
                     }
                 }
                 
                 // Add the last section
-                if (currentSection) {
-                    sections.push({
-                        title: currentSection.replace(/:\s*$/, ''),
+                if (currentSection && inSection) {
+                    extractedSections.push({
+                        title: currentSection,
+                        score: currentScore,
                         content: currentContent.trim()
                     });
                 }
             }
             
-            console.log('Found sections:', sections.length);
-            setSections(sections);
+            console.log('Found sections:', extractedSections.length);
+            setSections(extractedSections);
         } catch (error) {
-            console.error('Error processing report structure:', error);
-            // If structured processing fails, we still have the formatted result
+            console.error('Error parsing report:', error);
+            // Fallback to displaying the whole content as is
         }
     };
 
@@ -213,8 +267,11 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
                             onClick={() => {
                                 // Create cleaned version for download
                                 let cleanContent = result?.result || '';
-                                cleanContent = cleanContent.replace(/<think>\s*/, '');
-                                cleanContent = cleanContent.replace(/^\*\*\s*March \d+, \d+/, 'ITT Business-Readiness Report\n\nDate: $&');
+                                cleanContent = cleanContent.replace(/<think>[\s\S]*?<\/think>|<think>[\s\S]*/g, '');
+                                if (!cleanContent.trim()) {
+                                    cleanContent = result?.result?.replace(/<think>\s*/, '') || '';
+                                }
+                                cleanContent = cleanContent.replace(/^[\s\S]*?(Start-Up Readiness Report|March \d+, \d+)/, 'ITT Business-Readiness Report\n\nDate: $1');
                                 
                                 const blob = new Blob([cleanContent], { type: 'text/markdown' });
                                 const url = URL.createObjectURL(blob);
@@ -271,19 +328,22 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
                 <div className="mt-4 flex justify-end">
                     <button 
                         onClick={() => {
-                            // Create a blob with the markdown content
-                            const markdownContent = result?.result || '';
-                            const blob = new Blob([markdownContent], { type: 'text/markdown' });
+                            // Create cleaned version for download
+                            let cleanContent = result?.result || '';
+                            cleanContent = cleanContent.replace(/<think>[\s\S]*?<\/think>|<think>[\s\S]*/g, '');
+                            if (!cleanContent.trim()) {
+                                cleanContent = result?.result?.replace(/<think>\s*/, '') || '';
+                            }
+                            
+                            const blob = new Blob([cleanContent], { type: 'text/markdown' });
                             const url = URL.createObjectURL(blob);
                             
-                            // Create a temporary anchor element to download the file
                             const a = document.createElement('a');
                             a.href = url;
                             a.download = 'business-analysis-report.md';
                             document.body.appendChild(a);
                             a.click();
                             
-                            // Clean up
                             document.body.removeChild(a);
                             URL.revokeObjectURL(url);
                         }}
