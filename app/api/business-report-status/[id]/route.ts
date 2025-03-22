@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReportStatus } from '@/lib/db/queries';
 
-// Simple version that should work with Next.js canary
+// Simple version without maxDuration
 export function GET(req: NextRequest, { params }: any) {
   const reportId = params?.id;
   
@@ -21,4 +21,3 @@ export function GET(req: NextRequest, { params }: any) {
       return NextResponse.json({ error: 'Failed to fetch report status' }, { status: 500 });
     });
 }
-

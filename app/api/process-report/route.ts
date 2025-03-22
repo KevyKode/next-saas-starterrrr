@@ -4,7 +4,7 @@ import { db } from '@/lib/db/drizzle';
 import { reportRequests } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
-// Set to the maximum allowed for hobby plan (60 seconds)
+// Set to a valid value for the Vercel hobby plan (maximum is 60 seconds)
 export const maxDuration = 60; 
 
 export async function POST(req: NextRequest) {

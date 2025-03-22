@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUser, getTeamForUser, createReportRequest } from '@/lib/db/queries';
 import { checkMessageLimit } from '@/lib/db/utils';
 
-export const maxDuration = 300; // Set to maximum duration (in seconds) for your Vercel plan
+// Remove any maxDuration setting from this route or set it within limits
+// This route should be fast anyway since it just creates a DB entry
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,8 +30,7 @@ export async function POST(req: NextRequest) {
     // Create the report request and get the ID
     const reportId = await createReportRequest(user.id, team.id, formData);
 
-    // Start the webhook-based approach
-    // Return the reportId immediately
+    // Return the reportId immediately - no processing is done here
     return NextResponse.json({ 
       reportId,
       status: 'pending',
