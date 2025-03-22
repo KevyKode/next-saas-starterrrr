@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReportStatus } from '@/lib/db/queries';
 
-// Type signature for Next.js 15 canary
-export async function GET(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, context: any) {
   try {
-    const reportId = context.params.id;
+    // Await the params before accessing properties
+    const params = await context.params;
+    const reportId = params.id;
     
     if (!reportId) {
       return NextResponse.json(
@@ -35,3 +33,4 @@ export async function GET(
     );
   }
 }
+

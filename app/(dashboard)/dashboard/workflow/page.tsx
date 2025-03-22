@@ -63,31 +63,30 @@ export default function Workflow() {
         }
     }, [reportId]);
     
-    // Function to start the processing
-    const startProcessing = async () => {
-        if (reportId && !isProcessingStarted.current) {
-            isProcessingStarted.current = true;
-            
-            try {
-                console.log('Starting report processing...');
-                await fetch('/api/process-report', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        reportId,
-                        formData,
-                        userId: null, // This will be resolved server-side
-                        teamId: null  // This will be resolved server-side
-                    })
-                });
-                // We don't need to handle the response - the processing happens in the background
-            } catch (err) {
-                console.error('Error starting report processing:', err);
-            }
+   // Function to start the processing
+const startProcessing = async () => {
+    if (reportId && !isProcessingStarted.current) {
+        isProcessingStarted.current = true;
+        
+        try {
+            console.log('Starting report processing...');
+            await fetch('/api/process-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reportId,
+                    formData
+                })
+            });
+            // We don't need to handle the response - the processing happens in the background
+        } catch (err) {
+            console.error('Error starting report processing:', err);
         }
-    };
+    }
+};
+
     
     // Start polling for report status
     const startPolling = () => {
