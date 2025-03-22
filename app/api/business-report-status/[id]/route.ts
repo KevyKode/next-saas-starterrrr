@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReportStatus } from '@/lib/db/queries';
 
-export async function GET(request: NextRequest, context: any) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    // Await the params before accessing properties
-    const params = await context.params;
-    const reportId = params.id;
+    // In Next.js canary, params may be a Promise that needs to be awaited
+    // However, the exact syntax depends on the specific version
+    const reportId = typeof params.id === 'function' 
+      ? await params.id() 
+      : params.id;
     
     if (!reportId) {
       return NextResponse.json(
@@ -33,4 +38,3 @@ export async function GET(request: NextRequest, context: any) {
     );
   }
 }
-
