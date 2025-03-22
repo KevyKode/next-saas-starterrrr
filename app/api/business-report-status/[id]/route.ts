@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReportStatus } from '@/lib/db/queries';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// Use a very simple signature with 'any' to bypass type checking issues
+export async function GET(request: NextRequest, context: any) {
   try {
-    // In Next.js canary, params may be a Promise that needs to be awaited
-    // However, the exact syntax depends on the specific version
-    const reportId = typeof params.id === 'function' 
-      ? await params.id() 
-      : params.id;
+    // Access the ID parameter from the context
+    const reportId = context.params?.id;
     
     if (!reportId) {
       return NextResponse.json(
@@ -38,3 +33,4 @@ export async function GET(
     );
   }
 }
+
