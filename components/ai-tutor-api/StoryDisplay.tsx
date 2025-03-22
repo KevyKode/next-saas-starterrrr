@@ -230,3 +230,5 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
                 </div>
             )}
         </div>
+    );
+}
