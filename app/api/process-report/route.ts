@@ -81,18 +81,19 @@ export async function POST(req: NextRequest) {
         );
         
         return NextResponse.json({ status: 'completed' });
-      } catch (fetchError) {
+      } catch (error: unknown) {
         clearTimeout(timeoutId);
         
-        if (fetchError.name === 'AbortError') {
+        // Type check the error object
+        if (error instanceof Error && error.name === 'AbortError') {
           // If the request was aborted due to timeout, mark it as still in progress
-          // (client will continue polling and we'll pick it up on subsequent checks)
           console.log('Request timeout - marking for retry');
           await updateReportStatus(reportId, 'processing', 'Request timeout - will retry');
           return NextResponse.json({ status: 'processing', retry: true }, { status: 202 });
         }
         
-        throw fetchError;
+        // Re-throw for the outer catch block to handle
+        throw error;
       }
     } catch (error) {
       console.error('Processing error:', error);
