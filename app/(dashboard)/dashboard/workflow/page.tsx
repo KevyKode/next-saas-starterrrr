@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/workflow/page.tsx
 "use client";
 import { useState } from 'react';
 import StoryDisplay from '@/components/ai-tutor-api/StoryDisplay';
@@ -50,33 +49,49 @@ export default function Workflow() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
+        console.log('Form submitted');
+        
+        setError(''); 
         setLoading(true);
         setResult(null);
 
-        const options = {
-            method: 'POST',
-            headers: {
-                Authorization: 'Bearer sk_wzsb34sr3o3xdtw13ga1e2ciea52fnyy',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        };
-
         try {
-            const response = await fetch('https://aitutor-api.vercel.app/api/v1/run/wf_z17kkxc4nnupcimdpk6zi4zm', options);
-            const data = await response.json();
+            // Use our new dedicated business report API endpoint
+            console.log('Sending request to business-report API...');
+            const response = await fetch('/api/business-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            console.log('Response status:', response.status);
+            
+            let data;
+            try {
+                data = await response.json();
+                console.log('Response data:', data);
+            } catch (parseError) {
+                console.error('Failed to parse response:', parseError);
+                throw new Error('Invalid response format');
+            }
 
             if (response.ok) {
+                console.log('Setting result:', data);
                 setResult(data);
                 setError('');
             } else {
-                setError(data.error || 'An error occurred while processing your request.');
+                const errorMessage = data?.error || 'An error occurred while processing your request.';
+                console.error('API error:', errorMessage);
+                setError(errorMessage);
             }
         } catch (err) {
-            setError('An error occurred while processing your request.');
+            console.error('Request error:', err);
+            setError('An error occurred while processing your request. Please check the console for details.');
         } finally {
             setLoading(false);
+            console.log('Request completed');
         }
     };
 
@@ -106,21 +121,21 @@ export default function Workflow() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Problem Description */}
                             <div className="col-span-2">
-                <label className="block text-lg font-medium text-gray-700 mb-2">
-                    Problem Description:
-                </label>
-                <textarea
-                    name="problem_description"
-                    value={formData.problem_description}
-                    onChange={handleInputChange}
-                    className="w-full p-4 rounded-lg bg-white/50 border border-purple-200 resize-y min-h-[100px]"
-                    placeholder="In a few sentences, describe the problem you are solving."
-                    rows={4}
-                />
-            </div>
+                                <label className="block text-lg font-medium text-gray-700 mb-2">
+                                    Problem Description:
+                                </label>
+                                <textarea
+                                    name="problem_description"
+                                    value={formData.problem_description}
+                                    onChange={handleInputChange}
+                                    className="w-full p-4 rounded-lg bg-white/50 border border-purple-200 resize-y min-h-[100px]"
+                                    placeholder="In a few sentences, describe the problem you are solving."
+                                    rows={4}
+                                />
+                            </div>
 
-                            {/* Target Audience */}
-                            <div>
+                             {/* Target Audience */}
+                             <div>
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
                                     Target Audience:
                                 </label>
@@ -444,6 +459,21 @@ export default function Workflow() {
                                     placeholder="How much money do you currently have to operate your start-up?"
                                 />
                             </div>
+
+                            <div>
+                                <label className="block text-lg font-medium text-gray-700 mb-2">
+                                    Monthly Burn Rate:
+                                </label>
+                                <textarea
+                                    name="monthly_burn_rate"
+                                    value={formData.monthly_burn_rate}
+                                    onChange={handleInputChange}
+                                    className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
+                                    placeholder="How much money do you spend a month for your business?"
+                                />
+                            </div>
+                            
+                            {/* Add other fields as needed */}
                         </div>
                         <button
                             type="submit"

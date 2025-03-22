@@ -4,6 +4,7 @@ import { checkMessageLimit, incrementMessageCount, saveWorkflowHistory } from '@
 
 export async function POST(req: NextRequest) {
   try {
+    // Get the business form data from the request
     const formData = await req.json();
 
     // Get the authenticated user
@@ -36,7 +37,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Call the business report workflow API endpoint
+    // Call the business report workflow API endpoint with the form data
+    // Note: No need to check for story parameter as we're sending the whole form
     const response = await fetch(
       'https://aitutor-api.vercel.app/api/v1/run/wf_z17kkxc4nnupcimdpk6zi4zm',
       {
@@ -49,29 +51,28 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    // Try to get the response as text first
+    // Get the response as text first
     const responseText = await response.text();
-
+    
     // Try to parse as JSON, but if it fails, wrap in a result object
     let data;
     try {
       data = JSON.parse(responseText);
     } catch (e) {
-      // If not valid JSON, wrap the raw text in a result object
       data = { result: responseText, success: true };
     }
 
     if (!response.ok) {
       return NextResponse.json(
-        { error: data.error || 'Error generating report' },
+        { error: data.error || 'Error generating business report' },
         { status: response.status }
       );
     }
 
-    // Increment the team's message count after successful API call
+    // Increment the team's message count
     await incrementMessageCount(team.id, 1);
 
-    // Save workflow history - stringify the form data for input
+    // Save workflow history
     await saveWorkflowHistory(
       team.id, 
       user.id, 
@@ -79,10 +80,13 @@ export async function POST(req: NextRequest) {
       typeof data === 'object' ? JSON.stringify(data) : data
     );
 
-    // Return the response data
-    return NextResponse.json(data, { status: 200 });
+    // Format the response to match what StoryDisplay expects
+    // If data already has a result property, use it, otherwise wrap it
+    const formattedData = data.result ? data : { result: responseText, success: true };
+
+    return NextResponse.json(formattedData, { status: 200 });
   } catch (error: any) {
-    console.error('Report API Error:', error);
+    console.error('Business Report API Error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error: ' + (error.message || String(error)) },
       { status: 500 }

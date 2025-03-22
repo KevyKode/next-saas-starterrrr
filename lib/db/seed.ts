@@ -93,7 +93,7 @@ async function seed() {
     .values({
       name: 'Test Team',
       messageLimit: freeTier.messageLimit, // Set the message limit from the tier
-      currentMessages: 0,
+      currentMessages: 5,
     })
     .returning();
 

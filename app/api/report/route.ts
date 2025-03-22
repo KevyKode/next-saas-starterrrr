@@ -1,12 +1,20 @@
+// app/api/run/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { checkMessageLimit, incrementMessageCount, saveWorkflowHistory } from '@/lib/db/utils';
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.json();
+    const { story } = await req.json();
 
-    // Get the authenticated user
+    if (!story) {
+      return NextResponse.json(
+        { error: 'Missing story parameter' },
+        { status: 400 }
+      );
+    }
+
+    // Get the authenticated user.
     const user = await getUser();
     if (!user) {
       return NextResponse.json(
@@ -15,7 +23,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get the team details for the user
+    // Get the team details for the user.
     const team = await getTeamForUser(user.id);
     if (!team) {
       return NextResponse.json(
@@ -24,7 +32,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check the team's monthly message limit
+    // Check the team's monthly message limit.
     const { withinLimit, remainingMessages } = await checkMessageLimit(team.id);
     if (!withinLimit) {
       return NextResponse.json(
@@ -36,30 +44,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Call the business report workflow API endpoint
+    // Validate required environment variables.
+    if (!process.env.WORKFLOW_ID || !process.env.AITUTOR_API_KEY) {
+      return NextResponse.json(
+        { error: 'Missing environment variables: WORKFLOW_ID or AITUTOR_API_KEY' },
+        { status: 500 }
+      );
+    }
+
+    // Call the external AI Tutor API's run endpoint.
     const response = await fetch(
-      'https://aitutor-api.vercel.app/api/v1/run/wf_z17kkxc4nnupcimdpk6zi4zm',
+      `https://aitutor-api.vercel.app/api/v1/run/${process.env.WORKFLOW_ID}`,
       {
         method: 'POST',
         headers: {
-          Authorization: 'Bearer sk_wzsb34sr3o3xdtw13ga1e2ciea52fnyy',
+          Authorization: `Bearer ${process.env.AITUTOR_API_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ story }),
       }
     );
 
-    // Try to get the response as text first
-    const responseText = await response.text();
-
-    // Try to parse as JSON, but if it fails, wrap in a result object
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (e) {
-      // If not valid JSON, wrap the raw text in a result object
-      data = { result: responseText, success: true };
-    }
+    const data = await response.json();
 
     if (!response.ok) {
       return NextResponse.json(
@@ -68,23 +74,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Increment the team's message count after successful API call
+    // MOVED: Increment the team's message count AFTER successful API call
     await incrementMessageCount(team.id, 1);
 
-    // Save workflow history - stringify the form data for input
+    // Save workflow history
     await saveWorkflowHistory(
       team.id, 
       user.id, 
-      JSON.stringify(formData), 
-      typeof data === 'object' ? JSON.stringify(data) : data
+      story, 
+      data.result || JSON.stringify(data)
     );
 
-    // Return the response data
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
-    console.error('Report API Error:', error);
+    console.error('API Route Error:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error: ' + (error.message || String(error)) },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }
