@@ -250,11 +250,11 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
                     </div>
                 </div>
                 
-                {/* Report Sections */}
-                <div className="space-y-8">
+                {/* Report Content - All sections in one continuous block */}
+                <div className="prose prose-lg max-w-none">
                     {sections.map((section, index) => (
-                        <div key={index} className="mb-6">
-                            <div className="flex justify-between items-center mb-4">
+                        <div key={index} className="mb-8">
+                            <div className="flex justify-between items-center bg-gray-50 p-3 rounded-t-lg border-l-4 border-purple-500">
                                 <h2 className="text-xl font-bold text-gray-800">
                                     {section.title}
                                 </h2>
@@ -264,7 +264,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
                                     </span>
                                 )}
                             </div>
-                            <div className="prose prose-lg max-w-none">
+                            <div className="p-4 bg-white rounded-b-lg shadow-sm">
                                 {/* Convert the markdown content to HTML and insert it */}
                                 <div dangerouslySetInnerHTML={{ __html: safeMarkdownParse(section.content) }} />
                             </div>
@@ -320,9 +320,3 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
                     <h3 className="font-bold mb-2 text-red-600">Debug Information:</h3>
                     <pre className="whitespace-pre-wrap">{debugInfo}</pre>
                 </div>
-            )}
-        </div>
-    );
-};
-
-export default StoryDisplay;
