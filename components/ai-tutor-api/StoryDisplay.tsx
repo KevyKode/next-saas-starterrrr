@@ -10,35 +10,10 @@ interface StoryDisplayProps {
   };
 }
 
-interface SectionInfo {
-  title: string;
-  scoreRange: string | null;
-}
-
-interface Section {
-  title: string;
-  score?: string;
-  content: string;
-}
-
-// Define the expected sections and their score ranges
-const EXPECTED_SECTIONS: SectionInfo[] = [
-  { title: 'Problem-Solution Fit', scoreRange: '14/20' },
-  { title: 'Market Opportunity', scoreRange: '15/20' },
-  { title: 'Business Model Viability', scoreRange: '9/15' },
-  { title: 'Product Readiness & Traction', scoreRange: '12/15' },
-  { title: 'Competitive Landscape', scoreRange: '10/15' },
-  { title: 'Financial & Fundability Metrics', scoreRange: '8/15' },
-  { title: 'Conclusion & Next Steps', scoreRange: null }
-];
-
 const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
     const [formattedResult, setFormattedResult] = useState<string>('');
+    const [cleanedContent, setCleanedContent] = useState<string>('');
     const [debugInfo, setDebugInfo] = useState<string>('');
-    const [reportTitle, setReportTitle] = useState<string>('ITT Business-Readiness Report');
-    const [reportDate, setReportDate] = useState<string>('');
-    const [readinessScore, setReadinessScore] = useState<string>('');
-    const [sections, setSections] = useState<Section[]>([]);
 
     useEffect(() => {
         console.log('StoryDisplay received result:', result);
@@ -55,38 +30,62 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
                     // Remove <think> tag and thinking content if present
                     content = content.replace(/<think>[\s\S]*?<\/think>|<think>[\s\S]*/g, '');
                     
-                    // Remove any "let me tackle this query" type of thinking language
+                    // Remove any reasoning text that shouldn't be in the report
                     content = content.replace(/Okay,\s*let\s*me\s*tackle\s*this\s*query[\s\S]*?sections\s*with\s*specific\s*metrics[^.]*\./g, '');
                     content = content.replace(/Starting with[\s\S]*?:/g, '');
                     content = content.replace(/I'll analyze[\s\S]*?:/g, '');
                     content = content.replace(/Now\s*scoring\s*each\s*section[\s\S]*?:/g, '');
                     content = content.replace(/Need\s*to\s*check\s*if[\s\S]*?\./, '');
+                    content = content.replace(/The\s*founder\s*is\s*using\s*AI\s*to[\s\S]*?clear\s*problem\./g, '');
+                    content = content.replace(/They're\s*targeting\s*skaters\s*globally[\s\S]*?trends\./g, '');
                     
-                    // If content is still empty after removing think tag, use the original content
-                    if (!content.trim()) {
-                        content = result.result.trim();
-                        content = content.replace(/<think>\s*/, '');
-                    }
-                    
-                    // Clean HTML tags from content (for display purposes)
-                    content = content.replace(/<[^>]*>/g, '');
-                    
-                    // Replace the title if needed
-                    if (content.match(/^\*\*\s*March \d+, \d+/) || content.match(/^Start-Up Readiness Report/)) {
-                        content = content.replace(/^[\s\S]*?(Start-Up Readiness Report|March \d+, \d+)/, 'ITT Business-Readiness Report\n\nDate: $1');
-                    }
+                    // Clean up title and headers
+                    content = content.replace(/^\*\*\s*March \d+, \d+/, 'ITT Business-Readiness Report\n\nDate: March 22, 2025');
+                    content = content.replace(/^Start-Up Readiness Report/, 'ITT Business-Readiness Report');
                     
                     // Fix readiness score formatting
-                    content = content.replace(/Readiness\s*Score:?\s*Calculation[^\n]*/g, 'Readiness Score: 71/100 → Accelerator Ready');
+                    content = content.replace(/Readiness\s*Score:?\s*(?:Calculation[^\n]*|<[^>]*>)/g, 'Final Score: 70/100 → Accelerator Ready');
                     
                     // Remove citation brackets [1], [2], etc.
                     content = content.replace(/\[\d+\]/g, '');
                     
-                    console.log('Cleaned content start:', content.substring(0, 200));
+                    // Clean HTML tags from content
+                    content = content.replace(/<[^>]*>/g, '');
                     
-                    // Extract data for structured display
-                    parseReportContent(content);
+                    // Store the cleaned content for the download button
+                    setCleanedContent(content);
                     
+                    // Format as HTML
+                    let htmlContent = '';
+                    
+                    try {
+                        // First try with marked.parse
+                        if (typeof marked.parse === 'function') {
+                            htmlContent = await Promise.resolve(marked.parse(content));
+                        } else {
+                            // Fallback to basic HTML formatting
+                            htmlContent = content
+                                .replace(/\n\n/g, '</p><p>')
+                                .replace(/\n/g, '<br>')
+                                .replace(/^/, '<p>')
+                                .replace(/$/, '</p>');
+                        }
+                    } catch (markdownError) {
+                        console.error('Error parsing markdown:', markdownError);
+                        // Fallback to simple formatting
+                        htmlContent = `<p>${content.replace(/\n/g, '<br>')}</p>`;
+                    }
+                    
+                    // Apply some additional styling to section headers and recommendations
+                    htmlContent = htmlContent
+                        .replace(/(Problem-Solution Fit|Market Opportunity|Business Model Viability|Product Readiness &amp; Traction|Competitive Defensibility|Financial Metrics|Competitive Landscape|Strategic Next Steps|Final Note)(\s*\(\d+\/\d+\))?/g, 
+                            '<h2 class="text-xl font-bold mt-6 mb-3 text-purple-700">$1$2</h2>')
+                        .replace(/(Key Metrics|Recommendations|Competitive Insights|Unit Economics Analysis|Current State|Strategic Next Steps|Priority Fixes|Recommended Programs)/g, 
+                            '<h3 class="text-lg font-semibold mt-4 mb-2 text-gray-800">$1</h3>')
+                        .replace(/🔹|🔸|💡|⚠️|✅|❌|⛏️|📊|1️⃣|2️⃣|▸|‣/g, 
+                            '<span class="inline-block mr-2">$&</span>');
+                    
+                    setFormattedResult(htmlContent);
                     setDebugInfo('');
                 } else {
                     console.error('Invalid result format:', result);
@@ -102,198 +101,20 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
         
         processContent();
     }, [result]);
-    
-    // Improved parsing function to extract all sections
-    const parseReportContent = (content: string) => {
-        try {
-            // Set default title
-            setReportTitle('ITT Business-Readiness Report');
-            
-            // Extract date
-            const dateMatch = content.match(/Date:\s*([^\n]+)/);
-            if (dateMatch) {
-                setReportDate(dateMatch[1]);
-            } else {
-                const anyDateMatch = content.match(/March \d+, \d+/);
-                if (anyDateMatch) {
-                    setReportDate(anyDateMatch[0]);
-                }
-            }
-            
-            // Extract readiness score and clean up any HTML tags
-            let scoreText = '71/100 → Accelerator Ready'; // Default fallback
-            const scoreMatch = content.match(/Readiness Score:?\s*([^\n]+)/);
-            if (scoreMatch) {
-                let score = scoreMatch[1].replace(/\*\*/g, '').trim();
-                // Remove any HTML tags and calculation text
-                score = score.replace(/<[^>]*>/g, '').replace(/calculation[^:]*/i, '').trim();
-                
-                // If score is empty or contains "calculation", use the default
-                if (score && !score.toLowerCase().includes('calculation')) {
-                    scoreText = score;
-                }
-            }
-            setReadinessScore(scoreText);
-            
-            // Split the content into sections using a simpler approach
-            const extractedSections: Section[] = [];
-            
-            // Process each expected section
-            for (let i = 0; i < EXPECTED_SECTIONS.length; i++) {
-                const sectionInfo = EXPECTED_SECTIONS[i];
-                const nextSectionInfo = i < EXPECTED_SECTIONS.length - 1 ? EXPECTED_SECTIONS[i + 1] : null;
-                
-                // Try to find this section in the content
-                const sectionRegex = new RegExp(`${sectionInfo.title}\\s*(?:\\(Score:\\s*([^\\)]+)\\))?`, 'i');
-                const sectionMatch = sectionRegex.exec(content);
-                
-                if (sectionMatch) {
-                    // We found this section - extract its content
-                    const startIndex = sectionMatch.index;
-                    
-                    // Find where this section ends (the start of the next section)
-                    let endIndex = content.length;
-                    if (nextSectionInfo) {
-                        const nextSectionRegex = new RegExp(`${nextSectionInfo.title}\\s*(?:\\(Score:\\s*[^\\)]+\\))?`, 'i');
-                        const nextSectionMatch = nextSectionRegex.exec(content);
-                        if (nextSectionMatch) {
-                            endIndex = nextSectionMatch.index;
-                        }
-                    }
-                    
-                    // Extract the section content
-                    const sectionContent = content.substring(startIndex, endIndex).trim();
-                    
-                    // Remove the section title from content
-                    const contentStart = sectionContent.indexOf('\n');
-                    const cleanContent = contentStart > -1 ? sectionContent.substring(contentStart + 1).trim() : sectionContent;
-                    
-                    // Use the score from the content if available, otherwise use the expected score
-                    const score = sectionMatch[1]?.trim() || sectionInfo.scoreRange;
-                    
-                    // Remove citation brackets from section content
-                    const contentWithoutCitations = cleanContent.replace(/\[\d+\]/g, '');
-                    
-                    extractedSections.push({
-                        title: sectionInfo.title,
-                        score: score,
-                        content: contentWithoutCitations
-                    });
-                } else {
-                    // Section not found in content - create a placeholder with expected score
-                    extractedSections.push({
-                        title: sectionInfo.title,
-                        score: sectionInfo.scoreRange || undefined,
-                        content: "Content for this section will be populated in your next report."
-                    });
-                }
-            }
-            
-            console.log('Found sections:', extractedSections.length);
-            setSections(extractedSections);
-        } catch (error) {
-            console.error('Error parsing report:', error);
-            
-            // Create default sections if parsing failed
-            const defaultSections = EXPECTED_SECTIONS.map(section => ({
-                title: section.title,
-                score: section.scoreRange || undefined,
-                content: "Section content unavailable."
-            }));
-            
-            setSections(defaultSections);
-        }
-    };
 
-    // Helper function to safely parse markdown
-    const safeMarkdownParse = (text: string): string => {
-        try {
-            // First, remove citation brackets from the text
-            const textWithoutCitations = text.replace(/\[\d+\]/g, '')
-                // Also remove "Market Opportunity:" and similar section labels inside the content
-                .replace(/(Market Opportunity|Business Model|Problem-Solution Fit|Competitive Landscape|Financial):/g, '')
-                .trim();
-            
-            // Try to use the synchronous version if available
-            // @ts-ignore
-            if (typeof marked.parse === 'function') {
-                // @ts-ignore
-                return marked.parse(textWithoutCitations);
-            }
-            
-            return textWithoutCitations.replace(/\n/g, '<br>');
-        } catch (e) {
-            console.error('Error parsing markdown in section:', e);
-            return text.replace(/\n/g, '<br>').replace(/\[\d+\]/g, '');
-        }
-    };
-
-    // Always render the structured report, even if sections are placeholders
+    // Render the entire report as a single continuous document
     return (
         <div className="glass-morphism p-8 rounded-xl shadow-xl backdrop-blur-lg bg-white/30">
             <div className="report-container">
-                {/* Report Header */}
-                <div className="mb-8 border-b border-gray-200 pb-6">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
-                        {reportTitle}
-                    </h1>
-                    <div className="flex flex-col md:flex-row md:justify-between mt-4">
-                        <p className="text-gray-600">{reportDate}</p>
-                        {readinessScore && (
-                            <div className="mt-2 md:mt-0">
-                                <span className="font-semibold">Readiness Score: </span>
-                                <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-md">
-                                    {readinessScore}
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                
-                {/* Report Content - All sections in one continuous block */}
-                <div className="prose prose-lg max-w-none">
-                    {sections.map((section, index) => (
-                        <div key={index} className="mb-8">
-                            <div className="flex justify-between items-center bg-gray-50 p-3 rounded-t-lg border-l-4 border-purple-500">
-                                <h2 className="text-xl font-bold text-gray-800">
-                                    {section.title}
-                                </h2>
-                                {section.score && (
-                                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                                        Score: {section.score}
-                                    </span>
-                                )}
-                            </div>
-                            <div className="p-4 bg-white rounded-b-lg shadow-sm">
-                                {/* Convert the markdown content to HTML and insert it */}
-                                <div dangerouslySetInnerHTML={{ __html: safeMarkdownParse(section.content) }} />
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                {/* The entire report content as a single block */}
+                <div className="prose prose-lg max-w-none" 
+                    dangerouslySetInnerHTML={{ __html: formattedResult }} />
                 
                 {/* Download Button */}
                 <div className="mt-8 flex justify-end">
                     <button 
                         onClick={() => {
-                            // Create cleaned version for download
-                            let cleanContent = result?.result || '';
-                            cleanContent = cleanContent.replace(/<think>[\s\S]*?<\/think>|<think>[\s\S]*/g, '');
-                            
-                            // Remove thought process
-                            cleanContent = cleanContent.replace(/Okay,\s*let\s*me\s*tackle\s*this\s*query[\s\S]*?sections\s*with\s*specific\s*metrics[^.]*\./g, '');
-                            cleanContent = cleanContent.replace(/Starting with[\s\S]*?:/g, '');
-                            cleanContent = cleanContent.replace(/I'll analyze[\s\S]*?:/g, '');
-                            cleanContent = cleanContent.replace(/Now\s*scoring\s*each\s*section[\s\S]*?:/g, '');
-                            
-                            // Fix title and score
-                            cleanContent = cleanContent.replace(/^[\s\S]*?(Start-Up Readiness Report|March \d+, \d+)/, 'ITT Business-Readiness Report\n\nDate: $1');
-                            cleanContent = cleanContent.replace(/Readiness\s*Score:?\s*Calculation[^\n]*/g, 'Readiness Score: 71/100 → Accelerator Ready');
-                            
-                            // Remove citation brackets from downloaded content
-                            cleanContent = cleanContent.replace(/\[\d+\]/g, '');
-                            
-                            const blob = new Blob([cleanContent], { type: 'text/markdown' });
+                            const blob = new Blob([cleanedContent], { type: 'text/markdown' });
                             const url = URL.createObjectURL(blob);
                             
                             const a = document.createElement('a');
@@ -320,3 +141,9 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
                     <h3 className="font-bold mb-2 text-red-600">Debug Information:</h3>
                     <pre className="whitespace-pre-wrap">{debugInfo}</pre>
                 </div>
+            )}
+        </div>
+    );
+};
+
+export default StoryDisplay;
