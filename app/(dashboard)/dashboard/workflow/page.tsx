@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import StoryDisplay from '@/components/ai-tutor-api/StoryDisplay';
 import Link from 'next/link';
 import { WorkflowHistoryDrawer } from '@/components/workflow/WorkflowHistoryDrawer';
@@ -9,6 +9,8 @@ export default function Workflow() {
     const [result, setResult] = useState<any>(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [reportId, setReportId] = useState<string | null>(null);
+    const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
     const [formData, setFormData] = useState({
         problem_description: '',
         target_audience: '',
@@ -38,6 +40,62 @@ export default function Workflow() {
         monthly_burn_rate: ''
     });
 
+    // Set up polling when reportId changes
+    useEffect(() => {
+        // Clear any existing polling interval
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+            setPollingInterval(null);
+        }
+        
+        // If we have a reportId, start polling for status
+        if (reportId) {
+            const interval = setInterval(checkReportStatus, 2000); // Check every 2 seconds
+            setPollingInterval(interval);
+            
+            // Clean up on unmount
+            return () => clearInterval(interval);
+        }
+    }, [reportId]);
+    
+    // Function to check report status
+    const checkReportStatus = async () => {
+        if (!reportId) return;
+        
+        try {
+            const response = await fetch(`/api/business-report-status/${reportId}`);
+            const data = await response.json();
+            
+            if (response.ok) {
+                // If report is completed, stop polling and set the result
+                if (data.status === 'completed') {
+                    if (pollingInterval) {
+                        clearInterval(pollingInterval);
+                        setPollingInterval(null);
+                    }
+                    setResult(data.result);
+                    setLoading(false);
+                    setReportId(null);
+                } 
+                // If report failed, show error and stop polling
+                else if (data.status === 'failed') {
+                    if (pollingInterval) {
+                        clearInterval(pollingInterval);
+                        setPollingInterval(null);
+                    }
+                    setError('Report generation failed: ' + (data.error || 'Unknown error'));
+                    setLoading(false);
+                    setReportId(null);
+                }
+                // Otherwise, continue polling (status is still pending or processing)
+            } else {
+                setError(data.error || 'Failed to check report status');
+            }
+        } catch (err) {
+            console.error('Error checking report status:', err);
+        }
+    };
+
     // Handle input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -54,10 +112,10 @@ export default function Workflow() {
         setError(''); 
         setLoading(true);
         setResult(null);
+        setReportId(null);
 
         try {
-            // Use our new dedicated business report API endpoint
-            console.log('Sending request to business-report API...');
+            // Start the report generation process
             const response = await fetch('/api/business-report', {
                 method: 'POST',
                 headers: {
@@ -66,32 +124,20 @@ export default function Workflow() {
                 body: JSON.stringify(formData)
             });
             
-            console.log('Response status:', response.status);
-            
-            let data;
-            try {
-                data = await response.json();
-                console.log('Response data:', data);
-            } catch (parseError) {
-                console.error('Failed to parse response:', parseError);
-                throw new Error('Invalid response format');
-            }
+            const data = await response.json();
 
-            if (response.ok) {
-                console.log('Setting result:', data);
-                setResult(data);
-                setError('');
+            if (response.ok && data.reportId) {
+                // We've successfully started the report generation
+                setReportId(data.reportId);
+                // Note: we'll keep loading=true until the report is complete
             } else {
-                const errorMessage = data?.error || 'An error occurred while processing your request.';
-                console.error('API error:', errorMessage);
-                setError(errorMessage);
+                setError(data.error || 'Failed to start report generation');
+                setLoading(false);
             }
         } catch (err) {
             console.error('Request error:', err);
-            setError('An error occurred while processing your request. Please check the console for details.');
-        } finally {
+            setError('An error occurred while processing your request. Please try again later.');
             setLoading(false);
-            console.log('Request completed');
         }
     };
 
@@ -133,7 +179,7 @@ export default function Workflow() {
                                     rows={4}
                                 />
                             </div>
-
+                            
                              {/* Target Audience */}
                              <div>
                                 <label className="block text-lg font-medium text-gray-700 mb-2">
@@ -472,8 +518,7 @@ export default function Workflow() {
                                     placeholder="How much money do you spend a month for your business?"
                                 />
                             </div>
-                            
-                            {/* Add other fields as needed */}
+                            {/* Add your other form fields here */}
                         </div>
                         <button
                             type="submit"
@@ -486,7 +531,7 @@ export default function Workflow() {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    Generating...
+                                    {reportId ? 'Generating Report...' : 'Starting Generation...'}
                                 </span>
                             ) : (
                                 'Generate Report'
@@ -498,6 +543,12 @@ export default function Workflow() {
                 {error && (
                     <div className="glass-morphism p-4 mb-8 text-red-600 text-center rounded-lg bg-red-50/50">
                         {error}
+                    </div>
+                )}
+
+                {loading && reportId && (
+                    <div className="glass-morphism p-4 mb-8 text-blue-600 text-center rounded-lg bg-blue-50/50">
+                        Your report is being generated. This may take a few minutes...
                     </div>
                 )}
 

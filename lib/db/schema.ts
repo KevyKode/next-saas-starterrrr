@@ -7,6 +7,7 @@ import {
   timestamp,
   integer,
   pgEnum,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -195,4 +196,17 @@ export enum ActivityType {
   INVITE_TEAM_MEMBER = 'INVITE_TEAM_MEMBER',
   ACCEPT_INVITATION = 'ACCEPT_INVITATION',
 }
+
+// Add this to your existing schema.ts file
+export const reportRequests = pgTable('report_requests', {
+  id: text('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id),
+  teamId: integer('team_id').notNull().references(() => teams.id),
+  formData: jsonb('form_data').notNull(),
+  status: text('status').notNull(),
+  result: text('result'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 

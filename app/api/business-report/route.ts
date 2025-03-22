@@ -1,6 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUser, getTeamForUser } from '@/lib/db/queries';
-import { checkMessageLimit, incrementMessageCount, saveWorkflowHistory } from '@/lib/db/utils';
+import { getUser, getTeamForUser, createReportRequest, updateReportStatus } from '@/lib/db/queries';
+import { checkMessageLimit } from '@/lib/db/utils';
+
+// This function will be enqueued for background processing
+async function processReport(reportId: string, formData: any, userId: number, teamId: number) {
+  try {
+    // Update report status to processing
+    await updateReportStatus(reportId, 'processing', null);
+    
+    // Make the API request
+    const response = await fetch(
+      'https://aitutor-api.vercel.app/api/v1/run/wf_z17kkxc4nnupcimdpk6zi4zm',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer sk_wzsb34sr3o3xdtw13ga1e2ciea52fnyy',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      }
+    );
+
+    // Process response
+    if (!response.ok) {
+      const errorData = await response.text();
+      await updateReportStatus(reportId, 'failed', errorData);
+      return;
+    }
+
+    // Get response content
+    const responseText = await response.text();
+    
+    // Save the result
+    await updateReportStatus(reportId, 'completed', responseText);
+    
+    // Increment message count
+    const { incrementMessageCount, saveWorkflowHistory } = await import('@/lib/db/utils');
+    await incrementMessageCount(teamId, 1);
+    await saveWorkflowHistory(
+      teamId, 
+      userId, 
+      JSON.stringify(formData), 
+      responseText
+    );
+  } catch (error) {
+    console.error('Error processing report:', error);
+    await updateReportStatus(reportId, 'failed', 'Internal processing error');
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,7 +73,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check the team's monthly message limit
-    const { withinLimit, remainingMessages } = await checkMessageLimit(team.id);
+    const { withinLimit } = await checkMessageLimit(team.id);
     if (!withinLimit) {
       return NextResponse.json(
         {
@@ -37,54 +84,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Call the business report workflow API endpoint with the form data
-    // Note: No need to check for story parameter as we're sending the whole form
-    const response = await fetch(
-      'https://aitutor-api.vercel.app/api/v1/run/wf_z17kkxc4nnupcimdpk6zi4zm',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer sk_wzsb34sr3o3xdtw13ga1e2ciea52fnyy',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      }
-    );
+    // Create a new report request in the database
+    const reportId = await createReportRequest(user.id, team.id, formData);
 
-    // Get the response as text first
-    const responseText = await response.text();
+    // Start processing in the background
+    // This function will continue running even after the response is sent
+    processReport(reportId, formData, user.id, team.id);
     
-    // Try to parse as JSON, but if it fails, wrap in a result object
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (e) {
-      data = { result: responseText, success: true };
-    }
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: data.error || 'Error generating business report' },
-        { status: response.status }
-      );
-    }
-
-    // Increment the team's message count
-    await incrementMessageCount(team.id, 1);
-
-    // Save workflow history
-    await saveWorkflowHistory(
-      team.id, 
-      user.id, 
-      JSON.stringify(formData), 
-      typeof data === 'object' ? JSON.stringify(data) : data
-    );
-
-    // Format the response to match what StoryDisplay expects
-    // If data already has a result property, use it, otherwise wrap it
-    const formattedData = data.result ? data : { result: responseText, success: true };
-
-    return NextResponse.json(formattedData, { status: 200 });
+    // Return immediately with the report ID
+    return NextResponse.json({ 
+      reportId,
+      status: 'pending',
+      message: 'Report generation started' 
+    });
   } catch (error: any) {
     console.error('Business Report API Error:', error);
     return NextResponse.json(
@@ -92,4 +104,3 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}

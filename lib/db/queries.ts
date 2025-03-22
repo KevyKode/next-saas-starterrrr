@@ -127,3 +127,89 @@ export async function getTeamForUser(userId: number) {
 
   return result?.teamMembers[0]?.team || null;
 }
+
+import { v4 as uuidv4 } from 'uuid';
+import { reportRequests } from './schema';
+
+// Add these functions to your existing queries.ts file:
+
+// Create a new report request
+export async function createReportRequest(
+  userId: number,
+  teamId: number,
+  formData: any
+) {
+  const id = uuidv4();
+  
+  await db.insert(reportRequests).values({
+    id,
+    userId,
+    teamId,
+    formData,
+    status: 'pending',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+  
+  return id;
+}
+
+// Update a report's status
+export async function updateReportStatus(
+  id: string,
+  status: 'pending' | 'processing' | 'completed' | 'failed',
+  result: string | null
+) {
+  await db.update(reportRequests)
+    .set({
+      status,
+      result,
+      updatedAt: new Date(),
+    })
+    .where(eq(reportRequests.id, id));
+}
+
+// Get a report's status
+export async function getReportStatus(id: string) {
+  const report = await db.select()
+    .from(reportRequests)
+    .where(eq(reportRequests.id, id))
+    .limit(1);
+  
+  if (!report || report.length === 0) {
+    return null;
+  }
+  
+  const reportData = report[0];
+  
+  // If the report is completed, parse the result
+  if (reportData.status === 'completed' && reportData.result) {
+    try {
+      const parsedResult = JSON.parse(reportData.result);
+      return {
+        id: reportData.id,
+        status: reportData.status,
+        result: parsedResult,
+        createdAt: reportData.createdAt,
+        updatedAt: reportData.updatedAt,
+      };
+    } catch (e) {
+      // If parsing fails, return the result as a string
+      return {
+        id: reportData.id,
+        status: reportData.status,
+        result: { result: reportData.result, success: true },
+        createdAt: reportData.createdAt,
+        updatedAt: reportData.updatedAt,
+      };
+    }
+  }
+  
+  // Return the report without the result if not completed
+  return {
+    id: reportData.id,
+    status: reportData.status,
+    createdAt: reportData.createdAt,
+    updatedAt: reportData.updatedAt,
+  };
+}
