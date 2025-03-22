@@ -26,13 +26,16 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
                 console.log('Found result.result, parsing as markdown...');
                 
                 // Check if the result is actually markdown or if it's HTML
-                const content = result.result.trim();
+                let content = result.result.trim();
+                
+                // Clean up the content: remove <think> tag and set proper title
+                content = content.replace(/<think>\s*/, '');
+                content = content.replace(/^\*\*\s*March \d+, \d+/, 'ITT Business-Readiness Report\n\nDate: $&');
                 
                 if (content.startsWith('<') && content.includes('</')) {
                     // Seems to be HTML, no need to parse with marked
                     console.log('Content appears to be HTML, using directly');
                     setFormattedResult(content);
-                    processReport(content);
                 } else {
                     // Parse as markdown
                     const parser = new marked.Parser();
@@ -42,9 +45,10 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
                     const htmlContent = parser.parse(tokens);
                     console.log('Markdown parsed successfully');
                     setFormattedResult(htmlContent);
-                    processReport(content);
                 }
                 
+                // Process the report for structured display
+                processReport(content);
                 setDebugInfo('');
             } else {
                 console.error('Invalid result format:', result);
@@ -61,38 +65,97 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
     // Function to process and extract structured data from the report
     const processReport = (content: string) => {
         try {
-            // Extract title (first line)
-            const lines = content.split('\n');
-            if (lines.length > 0) {
-                setReportTitle(lines[0].replace(/^#+\s*/, ''));
-            }
+            console.log('Processing report content:', content.substring(0, 200));
+            
+            // Set default title if none is found
+            setReportTitle('ITT Business-Readiness Report');
             
             // Extract date
             const dateMatch = content.match(/Date:\s*([^\n]+)/);
             if (dateMatch) {
                 setReportDate(dateMatch[1]);
+            } else {
+                const anyDateMatch = content.match(/March \d+, \d+/);
+                if (anyDateMatch) {
+                    setReportDate(anyDateMatch[0]);
+                }
             }
             
             // Extract readiness score
-            const scoreMatch = content.match(/Readiness Score:\s*([^\n]+)/);
+            const scoreMatch = content.match(/Readiness Score:?\s*([^\n]+)/);
             if (scoreMatch) {
-                setReadinessScore(scoreMatch[1]);
+                setReadinessScore(scoreMatch[1].replace(/\*\*/g, ''));
             }
             
-            // Extract sections
-            const sectionRegex = /##\s*([^(]+)(?:\(Score:\s*([^)]+)\))?\s*\n([\s\S]*?)(?=##|$)/g;
-            const extractedSections: {title: string; score?: string; content: string}[] = [];
+            // Find all section headers and their scores
+            const sections: {title: string; score?: string; content: string}[] = [];
             
-            let match;
-            while ((match = sectionRegex.exec(content)) !== null) {
-                extractedSections.push({
-                    title: match[1].trim(),
-                    score: match[2]?.trim(),
-                    content: match[3].trim()
-                });
+            // Try different section patterns to find the right one
+            const sectionPatterns = [
+                // Pattern 1: ## Section Name (Score: X/Y)
+                /#{2,3}\s*([^(\n]+)(?:\(Score:\s*([^)]+)\))?\s*\n([\s\S]*?)(?=#{2,3}|$)/g,
+                
+                // Pattern 2: Section Name (Score: X/Y)
+                /([A-Z][^(:\n]+)(?:\(Score:\s*([^)]+)\))?:?\s*\n([\s\S]*?)(?=[A-Z][^(:\n]+(?:\([^)]+\))?:?\s*\n|$)/g,
+                
+                // Pattern 3: Section Name:
+                /([A-Z][^:\n]+):\s*\n([\s\S]*?)(?=[A-Z][^:\n]+:\s*\n|$)/g
+            ];
+            
+            let foundSections = false;
+            
+            for (const pattern of sectionPatterns) {
+                const matches = Array.from(content.matchAll(pattern));
+                if (matches.length > 0) {
+                    foundSections = true;
+                    for (const match of matches) {
+                        sections.push({
+                            title: match[1].trim(),
+                            score: match[2]?.trim(),
+                            content: match[match.length - 1].trim()
+                        });
+                    }
+                    break;
+                }
             }
             
-            setSections(extractedSections);
+            // If no sections found, try to split by lines starting with uppercase letters
+            if (!foundSections) {
+                console.log('No sections found with regex patterns, trying manual split');
+                const lines = content.split('\n');
+                let currentSection = '';
+                let currentContent = '';
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line && /^[A-Z]/.test(line) && line.length < 100 && (line.endsWith(':') || line.includes('(Score:'))) {
+                        // This looks like a section header
+                        if (currentSection) {
+                            // Save the previous section
+                            sections.push({
+                                title: currentSection.replace(/:\s*$/, ''),
+                                content: currentContent.trim()
+                            });
+                        }
+                        
+                        currentSection = line;
+                        currentContent = '';
+                    } else if (currentSection) {
+                        currentContent += line + '\n';
+                    }
+                }
+                
+                // Add the last section
+                if (currentSection) {
+                    sections.push({
+                        title: currentSection.replace(/:\s*$/, ''),
+                        content: currentContent.trim()
+                    });
+                }
+            }
+            
+            console.log('Found sections:', sections.length);
+            setSections(sections);
         } catch (error) {
             console.error('Error processing report structure:', error);
             // If structured processing fails, we still have the formatted result
@@ -100,7 +163,7 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
     };
 
     // If we have structured data, render a beautiful report
-    if (reportTitle) {
+    if (sections.length > 0) {
         return (
             <div className="glass-morphism p-8 rounded-xl shadow-xl backdrop-blur-lg bg-white/30">
                 <div className="report-container">
@@ -148,8 +211,12 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
                     <div className="mt-8 flex justify-end">
                         <button 
                             onClick={() => {
-                                const markdownContent = result?.result || '';
-                                const blob = new Blob([markdownContent], { type: 'text/markdown' });
+                                // Create cleaned version for download
+                                let cleanContent = result?.result || '';
+                                cleanContent = cleanContent.replace(/<think>\s*/, '');
+                                cleanContent = cleanContent.replace(/^\*\*\s*March \d+, \d+/, 'ITT Business-Readiness Report\n\nDate: $&');
+                                
+                                const blob = new Blob([cleanContent], { type: 'text/markdown' });
                                 const url = URL.createObjectURL(blob);
                                 
                                 const a = document.createElement('a');
