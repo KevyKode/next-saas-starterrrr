@@ -20,48 +20,67 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
     useEffect(() => {
         console.log('StoryDisplay received result:', result);
         
-        try {
-            // Check if we have the expected data structure
-            if (result && result.result) {
-                console.log('Found result.result, processing...');
-                
-                // Clean up the content
-                let content = result.result.trim();
-                
-                // Remove <think> tag if present
-                content = content.replace(/<think>[\s\S]*?<\/think>|<think>[\s\S]*/g, '');
-                
-                // If content is still empty after removing think tag, use the original content
-                if (!content.trim()) {
-                    content = result.result.trim();
-                    content = content.replace(/<think>\s*/, '');
+        const processContent = async () => {
+            try {
+                // Check if we have the expected data structure
+                if (result && result.result) {
+                    console.log('Found result.result, processing...');
+                    
+                    // Clean up the content
+                    let content = result.result.trim();
+                    
+                    // Remove <think> tag if present
+                    content = content.replace(/<think>[\s\S]*?<\/think>|<think>[\s\S]*/g, '');
+                    
+                    // If content is still empty after removing think tag, use the original content
+                    if (!content.trim()) {
+                        content = result.result.trim();
+                        content = content.replace(/<think>\s*/, '');
+                    }
+                    
+                    // Replace the title if needed
+                    if (content.match(/^\*\*\s*March \d+, \d+/) || content.match(/^Start-Up Readiness Report/)) {
+                        content = content.replace(/^[\s\S]*?(Start-Up Readiness Report|March \d+, \d+)/, 'ITT Business-Readiness Report\n\nDate: $1');
+                    }
+                    
+                    console.log('Cleaned content start:', content.substring(0, 200));
+                    
+                    // Parse as markdown for display - handle both async and sync versions
+                    try {
+                        // First try the synchronous version if available
+                        // @ts-ignore - This might be available in some versions
+                        const htmlContent = marked.parse ? marked.parse(content) : await marked(content);
+                        
+                        // Check if the result is a Promise
+                        if (htmlContent instanceof Promise) {
+                            const resolvedHtml = await htmlContent;
+                            setFormattedResult(resolvedHtml);
+                        } else {
+                            setFormattedResult(htmlContent);
+                        }
+                    } catch (markdownError) {
+                        console.error('Error parsing markdown:', markdownError);
+                        // Fallback to a simpler method
+                        setFormattedResult(`<div>${content.replace(/\n/g, '<br>')}</div>`);
+                    }
+                    
+                    // Extract data for structured display
+                    parseReportContent(content);
+                    
+                    setDebugInfo('');
+                } else {
+                    console.error('Invalid result format:', result);
+                    setFormattedResult('<p>Error: Received data is not in the expected format.</p>');
+                    setDebugInfo(JSON.stringify(result, null, 2));
                 }
-                
-                // Replace the title if needed
-                if (content.match(/^\*\*\s*March \d+, \d+/) || content.match(/^Start-Up Readiness Report/)) {
-                    content = content.replace(/^[\s\S]*?(Start-Up Readiness Report|March \d+, \d+)/, 'ITT Business-Readiness Report\n\nDate: $1');
-                }
-                
-                console.log('Cleaned content start:', content.substring(0, 200));
-                
-                // Parse as markdown for display
-                const htmlContent = marked.parse(content);
-                setFormattedResult(htmlContent);
-                
-                // Extract data for structured display
-                parseReportContent(content);
-                
-                setDebugInfo('');
-            } else {
-                console.error('Invalid result format:', result);
-                setFormattedResult('<p>Error: Received data is not in the expected format.</p>');
-                setDebugInfo(JSON.stringify(result, null, 2));
+            } catch (error) {
+                console.error('Error in StoryDisplay:', error);
+                setFormattedResult('<p>Error formatting the report. Please check the console for details.</p>');
+                setDebugInfo(error instanceof Error ? error.message : String(error));
             }
-        } catch (error) {
-            console.error('Error in StoryDisplay:', error);
-            setFormattedResult('<p>Error formatting the report. Please check the console for details.</p>');
-            setDebugInfo(error instanceof Error ? error.message : String(error));
-        }
+        };
+        
+        processContent();
     }, [result]);
     
     // Improved parsing function to extract all sections
@@ -216,6 +235,18 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
         }
     };
 
+    // Helper function to safely parse markdown
+    const safeMarkdownParse = (text: string): string => {
+        try {
+            // Try to use the synchronous version if available
+            // @ts-ignore - Try the synchronous version first
+            return typeof marked.parse === 'function' ? marked.parse(text) : text;
+        } catch (e) {
+            console.error('Error parsing markdown in section:', e);
+            return text.replace(/\n/g, '<br>');
+        }
+    };
+
     // If we have structured data, render a beautiful report
     if (sections.length > 0) {
         return (
@@ -255,7 +286,7 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
                                 </div>
                                 <div className="prose prose-lg max-w-none">
                                     {/* Convert the markdown content to HTML and insert it */}
-                                    <div dangerouslySetInnerHTML={{ __html: marked.parse(section.content) }} />
+                                    <div dangerouslySetInnerHTML={{ __html: safeMarkdownParse(section.content) }} />
                                 </div>
                             </div>
                         ))}
@@ -352,10 +383,3 @@ export default function StoryDisplay({ result }: StoryDisplayProps) {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        Download Report
-                    </button>
-                </div>
-            )}
-        </div>
-    );
-}
