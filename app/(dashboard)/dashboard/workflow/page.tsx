@@ -592,7 +592,7 @@ const startProcessing = async () => {
                                     Monthly Burn Rate:
                                 </label>
                                 <textarea
-                                    name="monthly burn rate"
+                                    name="monthly_burn_rate"
                                     value={formData.monthly_burn_rate}
                                     onChange={handleInputChange}
                                     className="w-full p-4 rounded-lg bg-white/50 border border-purple-200"
