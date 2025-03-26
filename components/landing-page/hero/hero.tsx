@@ -2,22 +2,23 @@
 
 import { useEffect, useMemo, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { MoveRight, Settings, ChevronRight } from "lucide-react";
+import { Info, MessageCircle, ChevronRight } from "lucide-react"; // Changed icons to match ITT buttons
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AnimatedGradientText } from "./components/animated-gradient-text";
 import { SparklesText } from "./components/sparkles-text";
 import { GlowEffect } from "./components/glow-effect";
-import { Confetti } from "./components/confetti"; // Import Confetti component
-import type { ConfettiRef } from "./components/confetti"; // Import ConfettiRef type
+import { Confetti } from "./components/confetti";
+import type { ConfettiRef } from "./components/confetti";
 
 function Hero() {
   const [titleNumber, setTitleNumber] = useState(0);
+  // Updated titles to align with innovation themes
   const titles = useMemo(
-    () => ["workflows", "chatbots", "personalities", "models"],
+    () => ["innovators", "creators", "entrepreneurs", "visionaries"],
     []
   );
-  const confettiRef = useRef<ConfettiRef>(null); // Ref to control confetti
+  const confettiRef = useRef<ConfettiRef>(null);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -30,7 +31,6 @@ function Hero() {
     return () => clearTimeout(timeoutId);
   }, [titleNumber, titles]);
 
-  // Function to trigger confetti on hover
   const handleConfetti = () => {
     confettiRef.current?.fire({
       particleCount: 100,
@@ -43,65 +43,72 @@ function Hero() {
     <div className="w-full relative">
       <div className="container mx-auto">
         <div className="flex gap-8 py-20 lg:py-32 items-center justify-center flex-col">
+          {/* Optional announcement banner */}
           <div
-            onMouseEnter={handleConfetti} // Trigger confetti on hover
+            onMouseEnter={handleConfetti}
             className="group"
           >
             <AnimatedGradientText>
-              🎉{" "}
+              ✨{" "}
               <hr className="mx-2 h-4 w-px shrink-0 bg-gray-300" />{" "}
               <span
                 className={cn(
-                  `inline animate-gradient bg-gradient-to-r from-[#ffaa40] via-[#9c40ff] to-[#ffaa40] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent`
+                  `inline animate-gradient bg-gradient-to-r from-[#6e3bff] via-[#3b7dff] to-[#6e3bff] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent`
                 )}
               >
-                Introducing AI Tutor API Stripe Starter
+                Join the Innovators Think Tank Community
               </span>
               <ChevronRight className="ml-1 size-3 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
             </AnimatedGradientText>
           </div>
+          
           <div className="flex gap-4 flex-col">
             <h1 className="text-5xl md:text-7xl max-w-2xl tracking-tighter text-center font-regular">
-              <span className="text-spektr-cyan-50">SaaS Wrapper for Your</span>
+              <span className="text-white">Transform Ideas</span>
               <span className="relative flex w-full justify-center overflow-hidden text-center md:pb-4 md:pt-1">
-                &nbsp;
-                {titles.map((title, index) => (
-                  <motion.div
-                    key={index}
-                    className="absolute"
-                    initial={{ opacity: 0, y: "-100" }}
-                    transition={{ type: "spring", stiffness: 50 }}
-                    animate={
-                      titleNumber === index
-                        ? { y: 0, opacity: 1 }
-                        : { y: titleNumber > index ? -150 : 150, opacity: 0 }
-                    }
-                  >
-                    <SparklesText
-                      text={title}
-                      className="text-5xl md:text-7xl"
-                    />
-                  </motion.div>
-                ))}
+                To&nbsp;
+                <motion.div
+                  className="inline-block"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1 }}
+                >
+                  <SparklesText
+                    text="Impact!"
+                    className="text-5xl md:text-7xl text-purple-500"
+                  />
+                </motion.div>
               </span>
             </h1>
-            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-muted-foreground max-w-2xl text-center">
-                Get quickly starter with an online subscription product that use AI Tutor API for agentic capabilities, Postgres for database management, and Stripe for payment processing
+            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-gray-300 max-w-2xl text-center">
+              Welcome to the community for {titles.map((title, index) => (
+                <motion.span
+                  key={index}
+                  className="inline-block"
+                  initial={{ opacity: 0, y: "-100" }}
+                  transition={{ type: "spring", stiffness: 50 }}
+                  animate={
+                    titleNumber === index
+                      ? { y: 0, opacity: 1 }
+                      : { y: titleNumber > index ? -50 : 50, opacity: 0 }
+                  }
+                >
+                  {titleNumber === index && title}
+                </motion.span>
+              ))}
             </p>
           </div>
+          
           <div className="flex flex-row gap-3 relative">
-            <Button size="lg" className="gap-4" variant="outline">
-              Get AI Tutor API <Settings className="w-4 h-4" />
-            </Button>
             <div className="relative">
               <Button
                 size="lg"
-                className="gap-4 bg-black text-white relative z-10"
+                className="gap-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300 relative z-10"
               >
-                Try this app <MoveRight className="w-4 h-4" />
+                <MessageCircle className="w-5 h-5" /> ITT Incubator
               </Button>
               <GlowEffect
-                colors={["#FF5733", "#33FF57", "#3357FF", "#F1C40F"]}
+                colors={["#6e3bff", "#3b7dff"]} // Purple and blue from ITT
                 mode="colorShift"
                 blur="soft"
                 duration={3}
@@ -109,14 +116,22 @@ function Hero() {
                 className="absolute inset-0"
               />
             </div>
+            
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="gap-2 border border-white/20 text-white hover:bg-white/5 transition-all duration-300"
+            >
+              <Info className="w-5 h-5" /> Learn More
+            </Button>
           </div>
         </div>
       </div>
-      {/* Confetti canvas positioned absolutely over the entire hero section */}
+      
       <Confetti
         ref={confettiRef}
         className="absolute left-0 top-0 z-10 size-full pointer-events-none"
-        manualstart={true} // Manual start to control via ref
+        manualstart={true}
       />
     </div>
   );
