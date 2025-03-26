@@ -49,7 +49,7 @@ interface SparklesTextProps {
   sparklesCount?: number;
 
   /**
-   * @default "{first: '#9E7AFF', second: '#FE8BBB'}"
+   * @default "{first: '#6e3bff', second: '#3b7dff'}"
    * @type string
    * @description
    * The colors of the sparkles
@@ -62,9 +62,11 @@ interface SparklesTextProps {
 
 const SparklesText: React.FC<SparklesTextProps> = ({
   text,
-  colors = { first: "#9E7AFF", second: "#FE8BBB" },
+  // Updated colors to match ITT theme
+  colors = { first: "#6e3bff", second: "#3b7dff" },
   className,
-  sparklesCount = 10,
+  // Increased default sparkle count for a more cosmic effect
+  sparklesCount = 15,
   ...props
 }) => {
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
@@ -102,7 +104,7 @@ const SparklesText: React.FC<SparklesTextProps> = ({
     const interval = setInterval(updateStars, 100);
 
     return () => clearInterval(interval);
-  }, [colors.first, colors.second]);
+  }, [colors.first, colors.second, sparklesCount]);
 
   return (
     <div

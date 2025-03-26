@@ -30,9 +30,10 @@ export type GlowEffectProps = {
 export function GlowEffect({
   className,
   style,
-  colors = ['#FF5733', '#33FF57', '#3357FF', '#F1C40F'],
-  mode = 'rotate',
-  blur = 'medium',
+  // Updated default colors to match ITT theme
+  colors = ['#6e3bff', '#3b7dff', '#8e3bff', '#3b4dff'],
+  mode = 'colorShift', // Changed default to colorShift for a more cosmic effect
+  blur = 'soft', // Changed default to soft for a more cosmic effect
   transition,
   scale = 1,
   duration = 5,
