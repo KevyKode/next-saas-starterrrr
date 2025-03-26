@@ -74,25 +74,23 @@ interface AnimatedGradientBackgroundProps {
  */
 const AnimatedGradientBackground: React.FC<AnimatedGradientBackgroundProps> = ({
    startingGap = 125,
-   Breathing = false,
+   Breathing = true, // Changed to true to enable subtle animation
    gradientColors = [
-      "#09090b00",
-      "#2979FF",
-      "#FF80AB",
-      "#FF6D00",
-      "#FFD600",
-      "#00E676",
-      "#3D5AFE"
+      "#09090b00", // Transparent start
+      "#0a0118", // Deep dark purple (almost black)
+      "#18061e", // Deep purple
+      "#3b0d99", // Medium purple
+      "#6e3bff", // Bright purple from ITT site
+      "#3b7dff", // Blue from ITT site
+      "#051530"  // Deep dark blue
    ],
-   gradientStops = [45, 50, 60, 70, 80, 90, 100],
-   animationSpeed = 0.02,
-   breathingRange = 5,
+   gradientStops = [30, 45, 55, 65, 75, 85, 100],
+   animationSpeed = 0.01, // Slowed down for more subtle effect
+   breathingRange = 3, // Reduced for more subtle breathing
    containerStyle = {},
    topOffset = 0.5,
    containerClassName = "",
 }) => {
-
-
 
    // Validation: Ensure gradientStops and gradientColors lengths match
    if (gradientColors.length !== gradientStops.length) {
