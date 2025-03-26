@@ -1,7 +1,7 @@
 // components/app-sidebar.tsx
 'use client';
 import * as React from "react";
-import { Users, Settings, Shield, Activity, MessageCircle, GemIcon, BotIcon } from 'lucide-react';
+import { Users, Settings, Shield, Activity, MessageCircle, GemIcon, BotIcon, Sparkles } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -14,43 +14,45 @@ import { NavUser } from '@/components/nav-user';
 import { usePathname } from 'next/navigation';
 import { Logo } from '@/components/logo';
 import { SubscriptionStatus } from '@/components/subscription-status';
+import { motion } from "framer-motion";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
 
+  // Modified nav items with ITT-specific naming and icons
   const navItems = [
     {
-      title: "Workflow",
+      title: "Innovation Hub",
       url: "/dashboard/workflow",
       icon: GemIcon,
       isActive: pathname.startsWith('/dashboard/workflow'),
     },
     {
-      title: "Chatbot",
+      title: "AI Assistant",
       url: "/dashboard/chatbot",
       icon: BotIcon,
       isActive: pathname.startsWith('/dashboard/chatbot'),
     },
     {
-      title: "Streaming",
+      title: "Community",
       url: "/dashboard/streaming",
       icon: MessageCircle,
       isActive: pathname.startsWith('/dashboard/streaming'),
     },
     {
-      title: "Team",
+      title: "Collaborators",
       url: '/dashboard/team',
       icon: Users,
       isActive: pathname.startsWith('/dashboard/team'),
     },
     {
-      title: "General",
+      title: "Preferences",
       url: '/dashboard/general',
       icon: Settings,
       isActive: pathname.startsWith('/dashboard/general'),
     },
     {
-      title: "Activity",
+      title: "Analytics",
       url: '/dashboard/activity',
       icon: Activity,
       isActive: pathname.startsWith('/dashboard/activity'),
@@ -65,24 +67,82 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar 
-      className="hidden lg:block transition-all duration-300 ease-in-out"
+      className="hidden lg:block transition-all duration-300 ease-in-out bg-black/90 border-r border-[#6e3bff]/20 overflow-hidden"
       {...props}
     >
-      <SidebarHeader className="py-4 flex flex-col items-center">
-        <Logo /> 
-      </SidebarHeader>
-      <SidebarContent className="flex flex-col flex-1">
-        <div className="flex-1">
+      {/* Cosmic background effect */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-br from-[#6e3bff]/10 to-transparent rounded-full blur-3xl -translate-y-1/2"></div>
+        <div className="absolute bottom-0 right-0 w-full h-64 bg-gradient-to-br from-[#3b7dff]/5 to-transparent rounded-full blur-3xl translate-y-1/3"></div>
+      </div>
+      
+      {/* Enhanced header with animation */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <SidebarHeader className="py-6 flex flex-col items-center relative">
+          <div className="relative">
+            <Logo />
+            <motion.div
+              className="absolute -top-1 -right-1 text-[#6e3bff]"
+              animate={{ 
+                opacity: [0.5, 1, 0.5],
+                scale: [0.8, 1.2, 0.8],
+                rotate: [0, 15, 0]
+              }}
+              transition={{ 
+                duration: 3,
+                repeat: Infinity,
+                repeatType: "reverse"
+              }}
+            >
+              <Sparkles size={16} />
+            </motion.div>
+          </div>
+          <motion.div 
+            className="mt-4 px-3 py-1 text-xs font-medium rounded-full bg-[#6e3bff]/10 text-[#6e3bff] border border-[#6e3bff]/20"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.2 }}
+          >
+            Transform Ideas to Impact
+          </motion.div>
+        </SidebarHeader>
+      </motion.div>
+      
+      <SidebarContent className="flex flex-col flex-1 relative z-10">
+        <motion.div 
+          className="flex-1"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
+        >
           <NavMain items={navItems} />
-        </div>
-        <div className="mt-2">
+        </motion.div>
+        
+        <motion.div 
+          className="mt-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.3 }}
+        >
           <SubscriptionStatus />
-        </div>
-        <SidebarFooter className="mt-auto">
-          <NavUser />
-        </SidebarFooter>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.3 }}
+        >
+          <SidebarFooter className="mt-auto border-t border-[#6e3bff]/10 pt-4">
+            <NavUser />
+          </SidebarFooter>
+        </motion.div>
       </SidebarContent>
-      <SidebarRail />
+      
+      <SidebarRail className="bg-black/70 border-r border-[#6e3bff]/10" />
     </Sidebar>
   );
 }

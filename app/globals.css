@@ -278,21 +278,23 @@
 :root {
   /* ITT colors */
   --itt-purple: #6e3bff;
-  --itt-blue: #3b7dff;
+  --itt-silver: #c0c0c0;  /* Added silver color */
   --itt-dark-purple: #18061e;
   --itt-dark-blue: #051530;
   --itt-background: #09090F;
+  --itt-card-bg: #121217;
+  --itt-card-active: #15121e;
   
   /* Override default theme with ITT colors */
   --background: var(--itt-background);
   --foreground: hsl(0 0% 98%);
-  --card: hsl(240 10% 5%);
+  --card: var(--itt-card-bg);
   --card-foreground: hsl(0 0% 98%);
   --popover: hsl(240 10% 5%);
   --popover-foreground: hsl(0 0% 98%);
   --primary: var(--itt-purple);
   --primary-foreground: hsl(0 0% 98%);
-  --secondary: var(--itt-blue);
+  --secondary: var(--itt-silver);  /* Changed from blue to silver */
   --secondary-foreground: hsl(0 0% 98%);
   --muted: hsl(240 3.7% 15.9%);
   --muted-foreground: hsl(240 5% 64.9%);
@@ -312,14 +314,84 @@
   }
 }
 
-/* ITT specific animations */
-@keyframes gradient-x {
+/* ITT animations */
+@keyframes cosmic-shift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
+@keyframes cosmic-pulse {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* ITT gradient utilities */
+.bg-itt-gradient {
+  background: linear-gradient(135deg, var(--itt-purple), var(--itt-silver), var(--itt-purple));
+  background-size: 300% 300%;
+  animation: cosmic-shift 15s ease infinite;
+}
+
+.bg-itt-cosmic {
+  background: linear-gradient(135deg, var(--itt-dark-purple), var(--itt-dark-blue));
+  background-size: 200% 200%;
+  animation: cosmic-shift 15s ease infinite;
+}
+
+.text-itt-gradient {
+  background: linear-gradient(135deg, var(--itt-purple), var(--itt-silver), var(--itt-purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% auto;
+  animation: cosmic-shift 8s ease infinite;
+}
+
 .animate-gradient-x {
   background-size: 200% 100%;
-  animation: gradient-x 10s ease infinite;
+  animation: cosmic-shift 10s ease infinite;
+}
+
+.border-itt-gradient {
+  border: 1px solid transparent;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  background-image: 
+    linear-gradient(to right, var(--itt-background), var(--itt-background)), 
+    linear-gradient(135deg, var(--itt-purple), var(--itt-silver));
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 15px rgba(110, 59, 255, 0.4);
+  transition: all 0.3s ease;
+}
+
+.itt-glow {
+  box-shadow: 0 0 15px rgba(110, 59, 255, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.itt-glow:hover {
+  box-shadow: 0 0 25px rgba(110, 59, 255, 0.5);
+}
+
+/* Dark mode refinements for ITT */
+.dark, [data-theme="dark"] {
+  --background: var(--itt-background);
+  --sidebar-background: var(--itt-background);
+  --sidebar-foreground: white;
+  --sidebar-border: rgba(110, 59, 255, 0.2);
+  --sidebar-accent: rgba(110, 59, 255, 0.1);
+  --sidebar-accent-foreground: white;
+  --sidebar-ring: rgba(110, 59, 255, 0.5);
+  --sidebar-primary: var(--itt-purple);
+  --sidebar-primary-foreground: white;
+}
+
+/* Ensure html and body are properly themed */
+html, body {
+  background-color: var(--itt-background);
+  color: white;
+  min-height: 100vh;
 }
