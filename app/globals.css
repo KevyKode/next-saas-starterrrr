@@ -274,3 +274,52 @@
   }
 }
 
+/* ITT Theme Colors */
+:root {
+  /* ITT colors */
+  --itt-purple: #6e3bff;
+  --itt-blue: #3b7dff;
+  --itt-dark-purple: #18061e;
+  --itt-dark-blue: #051530;
+  --itt-background: #09090F;
+  
+  /* Override default theme with ITT colors */
+  --background: var(--itt-background);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(240 10% 5%);
+  --card-foreground: hsl(0 0% 98%);
+  --popover: hsl(240 10% 5%);
+  --popover-foreground: hsl(0 0% 98%);
+  --primary: var(--itt-purple);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: var(--itt-blue);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(240 3.7% 15.9%);
+  --muted-foreground: hsl(240 5% 64.9%);
+  --accent: var(--itt-dark-purple);
+  --accent-foreground: hsl(0 0% 98%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(240 3.7% 15.9%);
+  --input: hsl(240 3.7% 15.9%);
+  --ring: var(--itt-purple);
+}
+
+/* Force dark theme */
+@layer base {
+  body {
+    @apply bg-[#09090F] text-white;
+  }
+}
+
+/* ITT specific animations */
+@keyframes gradient-x {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-x {
+  background-size: 200% 100%;
+  animation: gradient-x 10s ease infinite;
+}
