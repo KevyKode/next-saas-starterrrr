@@ -6,7 +6,8 @@ import { Icons } from "./icons";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Info } from "lucide-react";
 
-function StackedCircularFooter() {
+// Changed from function declaration + separate export to direct export
+export function StackedCircularFooter() {
   return (
     <footer className="relative min-h-[75vh] py-12 overflow-hidden">
       {/* Use the darker version of the background for the footer */}
@@ -109,4 +110,4 @@ function StackedCircularFooter() {
   );
 }
 
-export { StackedCircularFooter };
+// Removed the separate export statement
