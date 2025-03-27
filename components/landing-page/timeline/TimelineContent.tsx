@@ -68,8 +68,7 @@ export function TimelineContent() {
           quantity={100}
           staticity={30}
           color="#6e3bff"
-          minSize={0.5}
-          maxSize={2}
+          size={1}
         />
       </div>
 
