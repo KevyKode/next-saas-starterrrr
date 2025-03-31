@@ -8,21 +8,18 @@ const inputVariants = cva(
     variants: {
       variant: {
         default: "border border-input bg-transparent shadow-sm focus-visible:ring-1 focus-visible:ring-ring",
-        
-        // ITT-specific variants
         cosmic: "border border-white/10 bg-black/30 backdrop-blur-sm px-3 py-2 shadow-sm text-white placeholder:text-gray-500 focus-visible:border-[#6e3bff]/50 focus-visible:ring-1 focus-visible:ring-[#6e3bff]/50",
-        
         glassmorphic: "border border-white/10 bg-white/5 backdrop-blur-md px-3 py-2 text-white placeholder:text-gray-500 focus-visible:border-white/20 focus-visible:bg-white/10",
-        
         glow: "border border-[#6e3bff]/30 bg-black/40 px-3 py-2 text-white placeholder:text-gray-500 shadow-[0_0_5px_rgba(110,59,255,0.2)] focus-visible:shadow-[0_0_10px_rgba(110,59,255,0.4)] focus-visible:border-[#6e3bff]/50",
-        
         minimal: "border-b border-white/20 bg-transparent rounded-none px-3 py-2 text-white placeholder:text-gray-500 focus-visible:border-b-[#6e3bff]"
       },
-      size: {
+      // --- RENAMED VARIANT ---
+      inputSize: { // <-- Renamed from 'size' to 'inputSize'
         default: "h-10 px-3 py-2",
         sm: "h-8 px-3 py-1 text-xs",
         lg: "h-12 px-4 py-3 text-base",
       },
+      // --- END RENAMED VARIANT ---
       rounded: {
         default: "rounded-md",
         full: "rounded-full",
@@ -31,13 +28,14 @@ const inputVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "cosmic", // Changed default to cosmic for ITT theme
-      size: "default",
+      variant: "cosmic",
+      inputSize: "default", // <-- Updated default variant key
       rounded: "default",
     },
   }
 )
 
+// The InputProps interface automatically picks up the change from VariantProps
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement>,
     VariantProps<typeof inputVariants> {
@@ -47,7 +45,8 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, variant, size, rounded, containerClassName, icon, iconPosition = "left", ...props }, ref) => {
+  // --- Updated props destructuring ---
+  ({ className, type, variant, inputSize, rounded, containerClassName, icon, iconPosition = "left", ...props }, ref) => {
     // If there's an icon, wrap the input in a container
     if (icon) {
       return (
@@ -63,7 +62,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             type={type}
             className={cn(
-              inputVariants({ variant, size, rounded }),
+              // --- Updated CVA call ---
+              inputVariants({ variant, inputSize, rounded }), // Use inputSize here
               iconPosition === "left" ? "pl-10" : iconPosition === "right" ? "pr-10" : "",
               className
             )}
@@ -79,11 +79,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       )
     }
 
+    // Standard input without icon
     return (
       <input
         type={type}
         className={cn(
-          inputVariants({ variant, size, rounded }),
+          // --- Updated CVA call ---
+          inputVariants({ variant, inputSize, rounded }), // Use inputSize here
           className
         )}
         ref={ref}
