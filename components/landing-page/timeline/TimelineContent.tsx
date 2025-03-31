@@ -7,31 +7,7 @@ import { motion } from "framer-motion";
 import { GlowingEffectDemo } from "./components/glowing-effect-demo"; 
 import { DisplayCardsDemo } from "./components/display-cards-demo";
 import { ShuffleCards } from "./components/testimonial-cards";
-// Adjust the path if animated-gradient-background is located elsewhere
-import AnimatedGradientBackground from "../../footer/animated-gradient-background"; 
-
-// --- Main Exported Component ---
-export function TimelineSection() {
-  return (
-    <div className="relative overflow-hidden py-16">
-      {/* Cosmic particle background */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <AnimatedGradientBackground 
-          Breathing={true}
-          gradientColors={[
-            "#09090b00",
-            "#0a0118", 
-            "#18061e", 
-            "#3b0d99", 
-            "#6e3bff", 
-            "#3b7dff", 
-            "#051530"
-          ]}
-          topOffset={0.5}
-          startingGap={125}
-        />
-      </div>
-
+   
       <div className="container mx-auto px-4 md:px-6 relative z-10 max-w-7xl">
         <div className="text-center mb-12">
           <motion.h2 
@@ -72,7 +48,6 @@ export function TimelineSection() {
           <DesktopTimelineContent />
         </div>
       </div>
-    </div>
   );
 }
 
