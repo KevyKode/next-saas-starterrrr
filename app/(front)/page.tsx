@@ -12,9 +12,9 @@ export default function HomePage() {
         <Hero />
       </section>
 
-      <section>
+      {/*<section>
        <TimelineSection />
-      </section>
+      </section>*/}
 
       <section>
         <PricingPage />
