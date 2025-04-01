@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CreditCard, Database } from 'lucide-react';
 import { Hero } from '@/components/landing-page/hero/hero';
-//import { TimelineSection } from '@/components/landing-page/timeline/TimelineSection'; 
+import { TimelineSection } from '@/components/landing-page/timeline/TimelineSection'; 
 import PricingPage from './pricing/page';
 import { Footer } from '@/components/landing-page/footer/footer'; // <-- CORRECTED import name
 
@@ -13,9 +13,9 @@ export default function HomePage() {
         <Hero />
       </section>
 
-       {/*<section>
+       <section>
         <TimelineSection />
-      </section>*/} 
+      </section>
 
       <section>
         <PricingPage />

@@ -39,7 +39,7 @@ export function TimelineSection() {
             Transform Your Ideas to Impact
           </h2>
           <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
-            Our innovative approach transforms ideas into real-world solutions through these key stages.
+            Our innovation tool suite helps transforms ideas into real-world impact through these key stages.
           </p>
         </div>
         
