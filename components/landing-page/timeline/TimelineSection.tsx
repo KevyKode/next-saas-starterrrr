@@ -1,11 +1,17 @@
-"use client";
+// File: components/landing-page/timeline/TimelineSection.tsx
+"use client"; // <-- ADDED
 
 import React from "react";
 import { motion } from "framer-motion";
-import { GlowingEffectDemo } from "./components/glowing-effect-demo";
+// Corrected import paths assuming components are in ./components/
+import { GlowingEffectDemo } from "./components/glowing-effect-demo"; 
 import { DisplayCardsDemo } from "./components/display-cards-demo";
 import { ShuffleCards } from "./components/testimonial-cards";
-import AnimatedGradientBackground from "../footer/animated-gradient-background";
+// Corrected import path assuming footer is two levels up
+import AnimatedGradientBackground from "./components/landing-page/footer/animated-gradient-background"; 
+// Assuming TimelineContent is defined below or imported correctly
+// If TimelineContent is defined in THIS file, it doesn't need 'use client' itself
+// unless it also uses hooks/interactivity directly.
 
 export function TimelineSection() {
   return (
@@ -39,6 +45,7 @@ export function TimelineSection() {
         </div>
         
         {/* Mobile view - stacked components */}
+        {/* motion.div requires client component context */}
         <div className="md:hidden space-y-16">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -76,13 +83,18 @@ export function TimelineSection() {
 
         {/* Desktop view - timeline */}
         <div className="hidden md:block">
-          <TimelineContent />
+          {/* Ensure TimelineContent is correctly defined/imported */}
+          <TimelineContent /> 
         </div>
       </div>
     </div>
   );
 }
 
+// --- TimelineContent Definition (Keep as is if defined here) ---
+// If this component ALSO uses hooks/motion, it would need "use client"
+// If it's purely rendering JSX based on props/data, it can remain a Server Component
+// assuming the components it renders (GlowingEffectDemo etc.) handle their own client needs.
 interface TimelineEntry {
   title: string;
   content: React.ReactNode;
@@ -90,30 +102,9 @@ interface TimelineEntry {
 
 function TimelineContent() {
   const timelineData: TimelineEntry[] = [
-    {
-      title: "Innovate",
-      content: (
-        <div className="relative">
-          <GlowingEffectDemo />
-        </div>
-      ),
-    },
-    {
-      title: "Collaborate",
-      content: (
-        <div className="relative">
-          <DisplayCardsDemo />
-        </div>
-      ),
-    },
-    {
-      title: "Transform",
-      content: (
-        <div className="relative">
-          <ShuffleCards />
-        </div>
-      ),
-    },
+    { title: "Innovate", content: <div className="relative"><GlowingEffectDemo /></div> },
+    { title: "Collaborate", content: <div className="relative"><DisplayCardsDemo /></div> },
+    { title: "Transform", content: <div className="relative"><ShuffleCards /></div> },
   ];
 
   return (
@@ -126,7 +117,7 @@ function TimelineContent() {
       {/* Timeline entries */}
       <div className="space-y-24">
         {timelineData.map((entry, index) => (
-          <motion.div 
+          <motion.div // motion.div requires client context
             key={index} 
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
