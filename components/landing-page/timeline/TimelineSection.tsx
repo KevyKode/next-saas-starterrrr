@@ -1,36 +1,37 @@
 // File: components/landing-page/timeline/TimelineSection.tsx
-"use client"; // <-- ADDED
+"use client"; 
 
 import React from "react";
 import { motion } from "framer-motion";
-// Corrected import paths assuming components are in ./components/
+// Imports for components within the timeline/components/ directory
 import { GlowingEffectDemo } from "./components/glowing-effect-demo"; 
 import { DisplayCardsDemo } from "./components/display-cards-demo";
 import { ShuffleCards } from "./components/testimonial-cards";
-// Corrected import path assuming footer is two levels up
-import AnimatedGradientBackground from "./components/landing-page/footer/animated-gradient-background"; 
-// Assuming TimelineContent is defined below or imported correctly
-// If TimelineContent is defined in THIS file, it doesn't need 'use client' itself
-// unless it also uses hooks/interactivity directly.
+// --- CORRECTED Import Path for AnimatedGradientBackground ---
+// Goes up two levels (from timeline -> landing-page -> components)
+// Then down into footer/
+import AnimatedGradientBackground from "../../footer/animated-gradient-background"; 
+// --- END CORRECTION ---
 
 export function TimelineSection() {
   return (
     <div className="relative overflow-hidden py-16">
       {/* Cosmic particle background */}
       <div className="absolute inset-0 pointer-events-none z-0">
+        {/* Ensure AnimatedGradientBackground props are correct */}
         <AnimatedGradientBackground 
           Breathing={true}
           gradientColors={[
-            "#09090b00",
+            "#09090b00", // Transparent start for blending
             "#0a0118", 
             "#18061e", 
             "#3b0d99", 
             "#6e3bff", 
             "#3b7dff", 
-            "#051530"
+            "#051530"  // Dark end
           ]}
-          topOffset={0.5}
-          startingGap={125}
+          topOffset={0.5} // Adjust as needed
+          startingGap={125} // Adjust as needed
         />
       </div>
 
@@ -44,8 +45,7 @@ export function TimelineSection() {
           </p>
         </div>
         
-        {/* Mobile view - stacked components */}
-        {/* motion.div requires client component context */}
+        {/* Mobile view */}
         <div className="md:hidden space-y-16">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -81,9 +81,8 @@ export function TimelineSection() {
           </motion.div>
         </div>
 
-        {/* Desktop view - timeline */}
+        {/* Desktop view */}
         <div className="hidden md:block">
-          {/* Ensure TimelineContent is correctly defined/imported */}
           <TimelineContent /> 
         </div>
       </div>
@@ -91,10 +90,7 @@ export function TimelineSection() {
   );
 }
 
-// --- TimelineContent Definition (Keep as is if defined here) ---
-// If this component ALSO uses hooks/motion, it would need "use client"
-// If it's purely rendering JSX based on props/data, it can remain a Server Component
-// assuming the components it renders (GlowingEffectDemo etc.) handle their own client needs.
+// --- TimelineContent Definition ---
 interface TimelineEntry {
   title: string;
   content: React.ReactNode;
@@ -117,7 +113,7 @@ function TimelineContent() {
       {/* Timeline entries */}
       <div className="space-y-24">
         {timelineData.map((entry, index) => (
-          <motion.div // motion.div requires client context
+          <motion.div 
             key={index} 
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
