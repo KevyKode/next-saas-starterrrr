@@ -16,9 +16,8 @@ export interface DisplayCardProps {
   iconBgClassName?: string; 
 }
 
-// --- CORRECTED: Added 'className' back to props destructuring ---
 export function DisplayCard({
-  className, // <-- ADDED BACK
+  className, 
   icon = <Sparkles className="w-5 h-5 text-purple-300" />, 
   title = "Feature",
   description = "Innovator Suite Component",
@@ -28,19 +27,22 @@ export function DisplayCard({
   iconBgClassName = "bg-purple-600/20", 
 }: DisplayCardProps) {
   return (
+    // --- MODIFIED: Base styles for fanned layout ---
     <div
       className={cn(
-        // Base styles
-        "relative flex h-64 w-[34rem] -skew-y-[4deg] select-none flex-col justify-between rounded-xl p-6", 
-        "border border-gray-700/50 bg-gray-950/60 backdrop-blur-sm", 
-        "transition-all duration-500 ease-out", 
-        "after:absolute after:-right-1 after:top-[-5%] after:h-[110%] after:w-[15rem] after:bg-gradient-to-l after:from-gray-950 after:to-transparent after:content-['']",
-        "hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-900/20",
+        // Base styles - Adjusted width, removed skew, added origin for rotation
+        "absolute flex h-64 w-[28rem] select-none flex-col justify-between rounded-xl p-6 origin-bottom", // Reduced width slightly for fanning
+        "border border-gray-700/50 bg-gray-950/80 backdrop-blur-md shadow-xl", // Added shadow
+        "transition-all duration-300 ease-out", // Changed duration
+        // Removed ::after element as it might interfere with fanning
+        // Hover effect (scale and border) - will be triggered by group-hover on parent
+        "hover:border-purple-500/50", 
+        // Layout for direct children (icon/title div)
         "[&>div]:flex [&>div]:items-center [&>div]:gap-3", 
-        className // Apply passed className (now correctly defined)
+        className // Apply positioning, rotation, z-index, and hover effects from props
       )}
     >
-     {/* Card content */}
+     {/* Card content (no changes needed here) */}
       <div>
         <span className={cn("relative inline-block rounded-full p-2", iconBgClassName )}>{icon}</span>
         <p className={cn("text-lg font-semibold", titleClassName)}>{title}</p> 
@@ -51,17 +53,20 @@ export function DisplayCard({
   );
 }
 
-
-// DisplayCards container remains the same
+// --- MODIFIED: DisplayCards container is now just a relative positioning context ---
 export function DisplayCards({ cards }: { cards?: DisplayCardProps[] }) {
   if (!cards || cards.length === 0) {
     return null; 
   }
+
   return (
-    <div className="grid h-full w-full [grid-template-areas:'stack'] place-items-center">
+    // Removed grid layout. Parent div in ITTSuiteCardsFeature provides size and group context.
+    // This div is now just a fragment or simple div if needed for structure, but layout is handled by parent
+    <> 
       {cards.map((cardProps, index) => (
+        // Renders each card with absolute positioning defined in its className
         <DisplayCard key={index} {...cardProps} />
       ))}
-    </div>
+    </>
   );
 }
