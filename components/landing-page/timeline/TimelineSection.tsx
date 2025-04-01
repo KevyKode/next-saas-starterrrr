@@ -36,7 +36,7 @@ export function TimelineSection() {
                How It Works
              </h2>
              <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
-               Our Innovator Tool Suite helps transform ideas into real-world impact through these key stages.
+               The ITT Readiness Report helps transform ideas into real-world impact.
              </p>
            </div>
            <motion.div /* ... */ >
@@ -83,7 +83,7 @@ function TimelineContent() {
            How It Works
          </h2>
          <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
-           Our Innovator Tool Suite helps transform ideas into real-world impact through these key stages.
+           The ITT Readiness Report helps transform ideas into real-world impact through these key stages.
          </p>
        </div>
        
