@@ -22,7 +22,7 @@ const buttonVariants = cva(
         
         // ITT-specific variants
         cosmic: 
-          "border border-white/10 bg-black/30 text-white backdrop-blur-sm shadow-sm hover:bg-white/10 hover:border-white/20 transition-all duration-300",
+          "border border-white/10 bg-black/30 text-white backdrop-blur-sm shadow-sm hover:bg-black/10 hover:border-white/20 transition-all duration-300",
         
         gradient: 
           "bg-gradient-to-r from-[#6e3bff] to-[#3b7dff] text-white border-0 shadow-sm hover:shadow-[0_0_15px_rgba(110,59,255,0.4)] transition-all duration-300",
