@@ -1,4 +1,4 @@
-/* File: app/globals.css (Corrected v3 Syntax - Consolidated Base Layer) */
+/* File: app/globals.css (Corrected v3 Syntax - Final Fix for body styles) */
 
 /* Import Tailwind layers */
 @tailwind base;
@@ -37,7 +37,7 @@
     --itt-silver: hsl(var(--itt-silver-hsl)); 
     --itt-dark-purple: #18061e;
     --itt-dark-blue: #051530;
-    --itt-background: #09090F; 
+    --itt-background: #09090F; /* Your dark background hex */
     --itt-card-bg: #121217;
     --itt-card-active: #15121e;
     
@@ -51,7 +51,7 @@
 
   /* Dark Theme Overrides */
   .dark {
-    --background: var(--itt-background); 
+    --background: var(--itt-background); /* Use ITT dark bg hex directly */
     --foreground: 0 0% 98%;
     --card: var(--itt-card-bg);
     --card-foreground: 0 0% 98%;
@@ -89,24 +89,31 @@
     --sidebar-ring: hsl(var(--itt-purple-hsl) / 0.5); 
   }
 
-  /* Base element styling using @apply */
+  /* Base element styling using direct CSS properties */
   * {
-    @apply border-border; /* Use apply with v3 */
+    /* Set default border color using the CSS variable */
+    border-color: hsl(var(--border)); 
   }
   body {
-    @apply bg-background text-foreground; /* Use apply with v3 */
+    /* --- THIS IS THE FIX --- */
+    /* Directly apply background and foreground colors using variables */
+    /* Use the hex variable for background for simplicity */
+    background-color: var(--background); 
+    /* Use HSL variable for foreground */
+    color: hsl(var(--foreground)); 
+    /* Removed incorrect @apply directives */
+    
     font-family: 'Manrope', Arial, Helvetica, sans-serif; 
     min-height: 100vh; 
   }
   /* html { @apply dark; } /* Uncomment to force dark mode */
-} /* End of the single @layer base */
+} /* End of @layer base */
 
 /* Custom ITT Utilities */
 @layer utilities {
   .bg-itt-gradient {
     background: linear-gradient(135deg, var(--itt-purple), var(--itt-silver), var(--itt-purple));
     background-size: 300% 300%;
-    /* Use animation name defined in tailwind.config.js */
     animation: cosmic-shift-15 15s ease infinite; 
   }
   .bg-itt-cosmic {
@@ -130,8 +137,9 @@
     border: 1px solid transparent;
     background-clip: padding-box, border-box;
     background-origin: padding-box, border-box;
+    /* Use background variable directly here */
     background-image: 
-      linear-gradient(to right, hsl(var(--background)), hsl(var(--background))), 
+      linear-gradient(to right, var(--background), var(--background)), 
       linear-gradient(135deg, var(--itt-purple), var(--itt-silver));
   }
   .hover-glow:hover {
@@ -147,4 +155,3 @@
   }
   /* Keyframes are defined in tailwind.config.js for v3 */
 }
-
