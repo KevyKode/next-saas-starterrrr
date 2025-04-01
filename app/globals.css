@@ -1,35 +1,19 @@
 /* File: app/globals.css */
 
-/* Import base Tailwind styles */
 @import 'tailwindcss';
 
-/* Define base CSS variables and theme overrides */
 @layer base {
-  /* Default (Light Mode) + ITT Variables */
   :root {
-    /* Standard Variables */
+    /* --- Light Theme Variables --- */
     --background: 0 0% 100%; 
     --foreground: 240 10% 3.9%; 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%; 
-    --primary-foreground: 0 0% 98%; 
-    --secondary: 240 4.8% 95.9%; 
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    /* ... other light variables ... */
     --border: 240 5.9% 90%; 
     --input: 240 5.9% 90%; 
     --ring: 240 5.9% 10%; /* HSL for Ring */
     --radius: 0.6rem; 
 
-    /* ITT Specific Variables */
+    /* --- ITT Custom Variables --- */
     --itt-purple-hsl: 256 100% 62%; 
     --itt-purple: hsl(var(--itt-purple-hsl)); 
     --itt-silver-hsl: 0 0% 75%; 
@@ -39,16 +23,10 @@
     --itt-background: #09090F; 
     --itt-card-bg: #121217;
     --itt-card-active: #15121e;
-
-    /* Chart examples (Light) */
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* ... other light chart variables ... */
   }
 
-  /* Dark Theme Overrides */
+  /* --- Dark Theme Overrides --- */
   .dark {
     --background: var(--itt-background); 
     --foreground: 0 0% 98%;
@@ -69,101 +47,37 @@
     --border: 240 3.7% 15.9%; 
     --input: 240 3.7% 15.9%; 
     --ring: var(--itt-purple-hsl); /* Use HSL for ring */
-    
-    /* Dark Chart Colors */
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-
-    /* Dark Sidebar Colors */
-    --sidebar-background: var(--itt-background);
-    --sidebar-foreground: 0 0% 98%; 
-    --sidebar-primary: var(--itt-purple);
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: hsl(var(--itt-purple-hsl) / 0.1); 
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: hsl(var(--itt-purple-hsl) / 0.2); 
-    --sidebar-ring: hsl(var(--itt-purple-hsl) / 0.5); 
+    /* ... other dark chart & sidebar variables ... */
   }
 }
 
-/* Base element styling adjustments */
 @layer base {
   * {
-    /* Set default border/outline colors using CSS variables */
     border-color: hsl(var(--border)); 
     outline-color: hsl(var(--ring) / 0.5); 
-    /* Add default outline style/width if desired globally */
-    /* outline-width: 1px; */
-    /* outline-style: solid; */
   }
+  
+  /* --- MODIFIED: Apply base theme directly --- */
   body {
-    /* --- MODIFIED LINES --- */
-    /* Directly apply background and foreground colors using variables */
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    /* Removed: @apply bg-background text-foreground; */
-    
     font-family: 'Manrope', Arial, Helvetica, sans-serif; 
     min-height: 100vh; 
   }
-  /* Uncomment this if you want dark mode by default */
-  /* html { 
-    @apply dark; 
-  } */
+
+  /* --- NEW: Explicitly style html for dark mode --- */
+  html.dark {
+     color-scheme: dark; /* Hint to browser */
+  }
+  html.dark body {
+     background-color: hsl(var(--background)); /* Ensure dark background applies */
+     color: hsl(var(--foreground)); /* Ensure dark text applies */
+  }
 }
 
 /* Custom ITT Utilities */
 @layer utilities {
-  /* Gradient Backgrounds */
-  .bg-itt-gradient {
-    background: linear-gradient(135deg, var(--itt-purple), var(--itt-silver), var(--itt-purple));
-    background-size: 300% 300%;
-    animation: cosmic-shift 15s ease infinite;
-  }
-  .bg-itt-cosmic {
-    background: linear-gradient(135deg, var(--itt-dark-purple), var(--itt-dark-blue));
-    background-size: 200% 200%;
-    animation: cosmic-shift 15s ease infinite;
-  }
-  /* Gradient Text */
-  .text-itt-gradient {
-    background: linear-gradient(135deg, var(--itt-purple), var(--itt-silver), var(--itt-purple));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    background-size: 200% auto;
-    animation: cosmic-shift 8s ease infinite;
-  }
-  /* Animated Background Position */
-  .animate-gradient-x {
-    background-size: 200% 100%;
-    animation: cosmic-shift 10s ease infinite;
-  }
-  /* Gradient Border */
-  .border-itt-gradient {
-    border: 1px solid transparent;
-    background-clip: padding-box, border-box;
-    background-origin: padding-box, border-box;
-    background-image: 
-      linear-gradient(to right, hsl(var(--background)), hsl(var(--background))), 
-      linear-gradient(135deg, var(--itt-purple), var(--itt-silver));
-  }
-  /* Glow Effects */
-  .hover-glow:hover {
-    box-shadow: 0 0 15px hsl(var(--itt-purple-hsl) / 0.4); 
-    transition: all 0.3s ease;
-  }
-  .itt-glow {
-    box-shadow: 0 0 15px hsl(var(--itt-purple-hsl) / 0.3); 
-    transition: box-shadow 0.3s ease;
-  }
-  .itt-glow:hover {
-    box-shadow: 0 0 25px hsl(var(--itt-purple-hsl) / 0.5); 
-  }
-  /* Animation Definition */
+ /* ... your existing ITT utilities (.bg-itt-gradient, etc.) ... */
   @keyframes cosmic-shift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
