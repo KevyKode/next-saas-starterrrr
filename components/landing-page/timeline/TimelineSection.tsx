@@ -7,10 +7,8 @@ import { motion } from "framer-motion";
 import { GlowingEffectDemo } from "./components/glowing-effect-demo"; 
 import { DisplayCardsDemo } from "./components/display-cards-demo";
 import { ShuffleCards } from "./components/testimonial-cards";
-// --- CORRECTED Import Path for AnimatedGradientBackground ---
-// Goes up two levels (from timeline -> landing-page -> components)
-// Then down into footer/
-import AnimatedGradientBackground from "../../footer/animated-gradient-background"; 
+// --- CORRECTED Import Path & Syntax for AnimatedGradientBackground ---
+import AnimatedGradientBackground from "../footer/animated-gradient-background"; // Correct relative path and default import
 // --- END CORRECTION ---
 
 export function TimelineSection() {
@@ -22,16 +20,16 @@ export function TimelineSection() {
         <AnimatedGradientBackground 
           Breathing={true}
           gradientColors={[
-            "#09090b00", // Transparent start for blending
+            "#09090b00", 
             "#0a0118", 
             "#18061e", 
             "#3b0d99", 
             "#6e3bff", 
             "#3b7dff", 
-            "#051530"  // Dark end
+            "#051530"  
           ]}
-          topOffset={0.5} // Adjust as needed
-          startingGap={125} // Adjust as needed
+          topOffset={0.5} 
+          startingGap={125} 
         />
       </div>
 
