@@ -1,3 +1,4 @@
+// File: components/landing-page/timeline/components/glowing-effect.tsx
 "use client";
 
 import { memo, useCallback, useEffect, useRef } from "react";
@@ -23,7 +24,7 @@ const GlowingEffect = memo(
     inactiveZone = 0.7,
     proximity = 0,
     spread = 20,
-    variant = "default",
+    variant = "default", // Default variant will now use ITT colors
     glow = false,
     className,
     movementDuration = 2,
@@ -36,7 +37,8 @@ const GlowingEffect = memo(
 
     const handleMove = useCallback(
       (e?: MouseEvent | { x: number; y: number }) => {
-        if (!containerRef.current) return;
+        // ... handleMove logic remains the same ...
+         if (!containerRef.current) return;
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
         }
@@ -81,7 +83,8 @@ const GlowingEffect = memo(
     );
 
     useEffect(() => {
-      if (disabled) return;
+      // ... useEffect logic remains the same ...
+       if (disabled) return;
       const handleScroll = () => handleMove();
       const handlePointerMove = (e: PointerEvent) => handleMove(e);
       window.addEventListener("scroll", handleScroll, { passive: true });
@@ -93,6 +96,22 @@ const GlowingEffect = memo(
       };
     }, [handleMove, disabled]);
 
+    // --- MODIFIED: --gradient definition ---
+    const ittGradient = `repeating-conic-gradient(
+        from 236.84deg at 50% 50%,
+        #6e3bff 0%,        /* ITT Purple */
+        #3b7dff calc(50% / var(--repeating-conic-gradient-times)), /* ITT Blue */
+        #6e3bff calc(100% / var(--repeating-conic-gradient-times)) /* Back to ITT Purple */
+      )`;
+
+    const whiteGradient = `repeating-conic-gradient(
+        from 236.84deg at 50% 50%,
+        var(--black),
+        var(--black) calc(25% / var(--repeating-conic-gradient-times))
+      )`;
+    // --- End Modification ---
+
+
     return (
       <>
         <div
@@ -100,6 +119,8 @@ const GlowingEffect = memo(
             "pointer-events-none absolute -inset-px hidden rounded-[inherit] border opacity-0 transition-opacity",
             glow && "opacity-100",
             variant === "white" && "border-white",
+             // Use purple border for default variant if glow is active
+            variant === "default" && glow && "border-purple-500/50",
             disabled && "!block"
           )}
         />
@@ -111,26 +132,9 @@ const GlowingEffect = memo(
             "--start": "0",
             "--active": "0",
             "--glowingeffect-border-width": `${borderWidth}px`,
-            "--repeating-conic-gradient-times": "5",
-            "--gradient":
-              variant === "white"
-                ? `repeating-conic-gradient(
-                    from 236.84deg at 50% 50%,
-                    var(--black),
-                    var(--black) calc(25% / var(--repeating-conic-gradient-times))
-                  )`
-                : `radial-gradient(circle, #9466ff 10%, #9466ff00 20%),
-                     radial-gradient(circle at 40% 40%, #dd7bbb 5%, #dd7bbb00 15%),
-                     radial-gradient(circle at 60% 60%, #fca35d 10%, #fca35d00 20%), 
-                     radial-gradient(circle at 40% 60%, #ffdd5e 10%, #ffdd5e00 20%),
-                     repeating-conic-gradient(
-                      from 236.84deg at 50% 50%,
-                      #9466ff 0%,
-                      #dd7bbb calc(25% / var(--repeating-conic-gradient-times)),
-                      #fca35d calc(50% / var(--repeating-conic-gradient-times)), 
-                      #ffdd5e calc(75% / var(--repeating-conic-gradient-times)),
-                      #9466ff calc(100% / var(--repeating-conic-gradient-times))
-                     )`,
+            "--repeating-conic-gradient-times": "5", // Controls how many times gradient repeats
+            // --- MODIFIED: Use conditional gradient ---
+            "--gradient": variant === "white" ? whiteGradient : ittGradient,
           } as React.CSSProperties}
           className={cn(
             "pointer-events-none absolute inset-0 rounded-[inherit] opacity-100 transition-opacity",
@@ -150,6 +154,7 @@ const GlowingEffect = memo(
               "after:opacity-[var(--active)] after:transition-opacity after:duration-300",
               "after:[mask-clip:padding-box,border-box]",
               "after:[mask-composite:intersect]",
+              // This mask creates the glowing border effect based on mouse position
               "after:[mask-image:linear-gradient(#0000,#0000),conic-gradient(from_calc((var(--start)-var(--spread))*1deg),#00000000_0deg,#fff,#00000000_calc(var(--spread)*2deg))]"
             )}
           />

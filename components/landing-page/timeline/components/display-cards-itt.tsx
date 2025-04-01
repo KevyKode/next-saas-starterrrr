@@ -6,9 +6,9 @@ import { DisplayCards } from "./display-cards";
 import { BrainCircuit, Network, Library } from "lucide-react"; 
 import { cn } from "@/lib/utils"; 
 
-// --- MODIFIED: Card definitions for initial fan + hover reveal ---
+// --- MODIFIED: Card definitions for bottom-right positioning ---
 const ittSuiteCards = [
-  { // Card 3 (Back - Left)
+  { // Card 3 (Back - Top Left relative to corner)
     icon: <Library className="w-5 h-5 text-cyan-300" />, 
     title: "Resource Hub",
     description: "Access tools, templates, and learning materials.",
@@ -16,16 +16,16 @@ const ittSuiteCards = [
     iconBgClassName: "bg-cyan-600/20",
     titleClassName: "text-cyan-400",
     className: cn(
-      "[grid-area:stack]", 
-      // Initial State: Fanned left, slightly up (showing title above Card 2)
-      "-rotate-[10deg] -translate-x-[4rem] -translate-y-[7rem]", 
-      // Hover State: Rotate more, move further up and left
-      "group-hover:-rotate-[16deg] group-hover:-translate-x-[10rem] group-hover:-translate-y-[18rem]", 
+      "absolute bottom-0 right-0", // Anchor bottom-right
+      // Initial State: Fanned up-left, titles visible
+      "-rotate-[10deg] -translate-x-[6rem] -translate-y-[7rem]", 
+      // Hover State: Move further up-left
+      "group-hover:-rotate-[12deg] group-hover:-translate-x-[10rem] group-hover:-translate-y-[22rem]", 
       "z-10", 
       "border-cyan-900/30 bg-gray-950/80 backdrop-blur-md" 
     ),
   },
-  { // Card 2 (Middle - Slightly Left)
+  { // Card 2 (Middle - Up Left relative to corner)
     icon: <Network className="w-5 h-5 text-blue-300" />, 
     title: "Incubator Network",
     description: "Connect with mentors, peers, and investors.",
@@ -33,25 +33,25 @@ const ittSuiteCards = [
     iconBgClassName: "bg-blue-600/20",
     titleClassName: "text-blue-400",
     className: cn(
-      "[grid-area:stack]", 
-      // Initial State: Fanned slightly left, slightly up (showing title above Card 1)
-      "-rotate-[5deg] -translate-x-[2rem] -translate-y-[3.5rem]", 
-      // Hover State: Rotate more, move further up and left
-      "group-hover:-rotate-[8deg] group-hover:-translate-x-[5rem] group-hover:-translate-y-[9rem]", 
+      "absolute bottom-0 right-0", // Anchor bottom-right
+      // Initial State: Fanned slightly up-left, titles visible
+      "-rotate-[5deg] -translate-x-[3rem] -translate-y-[3.5rem]", 
+      // Hover State: Move further up-left
+      "group-hover:-rotate-[6deg] group-hover:-translate-x-[5rem] group-hover:-translate-y-[11rem]", 
       "z-20", 
       "border-blue-900/30 bg-gray-950/80 backdrop-blur-md" 
     ),
   },
-  { // Card 1 (Front - Center/Slightly Right)
+  { // Card 1 (Front - Closest to corner)
     icon: <BrainCircuit className="w-5 h-5 text-purple-300" />, 
-    title: "AI Startup Analysis",
-    description: "Data-driven insights into your startup's readiness.",
-    date: "Core Feature", 
+    title: "Business Analysis Report",
+    description: "Data-driven insights to help your startup's scale.",
+    date: "Readiness Assessment", 
     iconBgClassName: "bg-purple-600/20", 
     titleClassName: "text-purple-400", 
     className: cn(
-      "[grid-area:stack]", 
-      // Initial State: Minimal rotation/translation
+      "absolute bottom-0 right-0", // Anchor bottom-right
+      // Initial State: Minimal offset/rotation
       "rotate-[0deg] translate-x-0 translate-y-0", 
       // Hover State: Lift slightly
       "group-hover:-translate-y-[1rem]", 
@@ -63,10 +63,10 @@ const ittSuiteCards = [
 
 export function ITTSuiteCardsFeature() { 
   return (
-    // Container needs enough height for initial fan + hover movement
-    <div className="flex min-h-[40rem] w-full items-center justify-center py-8"> 
-      {/* Container needs group class and enough height/width */}
-      <div className="group w-full max-w-xl relative h-[30rem]"> {/* Adjusted height */}
+    // --- MODIFIED: Container alignment ---
+    <div className="flex w-full items-end justify-end py-8 pr-8 min-h-[36rem]"> 
+      {/* Container: group, relative, explicit height/width */}
+      <div className="group w-full max-w-md relative h-[32rem]"> 
         <DisplayCards cards={ittSuiteCards} /> 
       </div>
     </div>

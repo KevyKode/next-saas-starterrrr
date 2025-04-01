@@ -1,52 +1,28 @@
 // File: app/(front)/pricing/page.tsx
-import { checkoutAction } from '@/lib/payments/actions';
-import { Check } from 'lucide-react';
-import { tiers } from '@/lib/tiers';
+// --- THIS IS THE COMPLETE AND CORRECTED CONTENT ---
+
+import { checkoutAction } from '@/lib/payments/actions'; 
+import { Check, Sparkles, Star, Pencil } from 'lucide-react'; // Combine icon imports
+import { tiers, type Tier } from '@/lib/tiers'; // Use .tsx extension and import Tier
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Sparkles, Star, Pencil } from "lucide-react";
+import Link from "next/link"; // Import Link
 
-interface PricingTier {
-    name: string;
-    icon: React.ReactNode;
-    price: number | null;
-    description: string;
-    features: string[];
-    popular?: boolean;
-    color: string; // Keep color if used for other styling, otherwise can remove
-    priceId?: string;
-    messageLimit: number;
-    isFreeTier?: boolean;
-}
+// Revalidation setting (optional)
+export const revalidate = 3600; 
 
-export const revalidate = 3600;
+// Main Page Component Definition
+export default async function PricingPage() { 
+    // Use the imported tiers data
+    const pricingTiers: Tier[] = tiers; 
 
-export default async function PricingPage() {
-    const pricingTiers: PricingTier[] = tiers.map((tier) => ({
-        name: tier.name,
-        icon: tier.id === 'free' ? <Pencil className="w-6 h-6" /> : (tier.id === 'starter' ? <Star className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />),
-        price: tier.priceMonthly,
-        description: tier.description,
-        features: tier.features,
-        popular: tier.id === 'starter',
-        color: tier.id === 'free' ? 'blue' : (tier.id === 'starter' ? 'amber' : 'blue'),
-        priceId: tier.priceId,
-        messageLimit: tier.messageLimit
-    }));
-
-    return (
-        // --- MODIFIED LINE ---
-        // Changed py-20 to pt-20 (removed bottom padding)
-        // Replaced style with className bg-gray-950 for consistency
-        <div className="w-full pt-20 bg-gray-950 text-white"> 
-            {/* Removed min-h-screen as it might interfere with layout flow to footer */}
-            {/* Removed fixed cosmic background effects - assuming these are handled globally or by hero */}
-            {/* If you NEED the blur effects here, they need careful positioning */}
-            
-            <div className="container mx-auto max-w-7xl relative z-10">
+    // Ensure the return statement is correct
+    return ( 
+        <div className="w-full bg-gray-950 text-white"> 
+            <div className="container mx-auto max-w-7xl relative z-10 py-20 md:py-28"> 
                 <div className="flex text-center justify-center items-center gap-4 flex-col">
+                    {/* Heading Section */}
                     <div className="flex gap-2 flex-col mb-8">
-                        {/* Assuming text-itt-gradient is defined in your globals.css or tailwind config */}
                         <h2 className="text-4xl md:text-6xl font-bold mb-4 text-itt-gradient"> 
                             Choose Your Plan
                         </h2>
@@ -55,23 +31,13 @@ export default async function PricingPage() {
                         </p>
                     </div>
                     
+                    {/* Grid Section */}
                     <div className="grid pt-8 text-left grid-cols-1 lg:grid-cols-3 w-full gap-8">
-                        {/* Free Tier First */}
-                        {pricingTiers.filter(tier => tier.price === null).map((tier, idx) => (
-                            <div key={tier.name}>
-                                <PricingCard
-                                    tier={tier}
-                                    isFreeTier
-                                />
-                            </div>
-                        ))}
-
-                        {/* Paid Tiers */}
-                        {pricingTiers.filter(tier => tier.price !== null).map((tier, index) => (
-                            <div key={tier.name} className="relative">
+                        {/* Map through all tiers */}
+                        {pricingTiers.map((tier) => ( 
+                            <div key={tier.id} className="relative"> 
                                 {tier.popular && (
                                     <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 z-20">
-                                        {/* Assuming --itt-purple and --itt-silver are defined CSS variables */}
                                         <span className="px-4 py-1 text-xs font-medium text-white rounded-full shadow-lg"
                                              style={{ 
                                                  background: 'linear-gradient(to right, var(--itt-purple), var(--itt-silver))',
@@ -81,9 +47,10 @@ export default async function PricingPage() {
                                         </span>
                                     </div>
                                 )}
+                                {/* Render the PricingCard component */}
                                 <PricingCard
                                     tier={tier}
-                                    index={index} // Pass index if needed by PricingCard
+                                    isFreeTier={tier.priceMonthly === null} 
                                 />
                             </div>
                         ))}
@@ -91,73 +58,67 @@ export default async function PricingPage() {
                 </div>
             </div>
         </div>
-    );
-}
+    ); // End of return statement
+} // End of PricingPage function
 
-// --- PricingCard Component (Modified for dark theme consistency) ---
+// --- PricingCard Component (Helper within this file) ---
+// Make sure this function definition is OUTSIDE the PricingPage function
 function PricingCard({
     tier,
     isFreeTier = false,
-    index = 0 // Keep index if needed
 }: {
-    tier: PricingTier;
+    tier: Tier; 
     isFreeTier?: boolean;
-    index?: number;
 }) {
-    const {name, icon, price, description, features, popular, color, priceId, messageLimit} = tier;
+    const {id, name, icon, priceMonthly, description, features, popular, priceId, reportLimit} = tier; 
     
-    // Define card styles based on props for better readability
-    const cardBg = popular ? 'bg-gray-900' : 'bg-gray-950/60'; // Slightly different bg for popular
+    const cardBg = popular ? 'bg-gray-900' : 'bg-gray-950/60'; 
     const cardBorder = popular ? 'border-purple-600' : 'border-gray-700/50';
     const cardShadow = popular ? 'shadow-[0_10px_30px_-10px_rgba(110,59,255,0.2)]' : 'shadow-md shadow-black/20';
     const iconBg = popular ? 'bg-purple-600/20' : 'bg-purple-600/10';
-    const iconColor = 'text-purple-400'; // Consistent purple icon color
+    const iconColor = 'text-purple-400'; 
     const checkBg = 'bg-purple-600/15';
     const checkColor = 'text-purple-400';
     const buttonStyle = popular 
-        ? { background: 'linear-gradient(to right, var(--itt-purple, #6e3bff), var(--itt-silver, #8A95A5))' } // Define fallbacks
+        ? { background: 'linear-gradient(to right, var(--itt-purple, #6e3bff), var(--itt-silver, #8A95A5))' } 
         : {};
     const buttonHover = popular ? 'hover:shadow-lg hover:shadow-purple-500/30' : 'hover:bg-purple-600/20';
 
     return (
         <div className={cn(
-            "relative h-full overflow-hidden rounded-xl border backdrop-blur-sm transition-all duration-300",
+            "relative flex flex-col h-full overflow-hidden rounded-xl border backdrop-blur-sm transition-all duration-300", 
             cardBg,
             cardBorder,
             cardShadow
         )}>
-            <div className="p-8">
-                <div className={cn("w-12 h-12 rounded-full mb-4 flex items-center justify-center", iconBg)}>
+            <div className="p-8 flex flex-col flex-grow"> 
+                <div className={cn("w-12 h-12 rounded-full mb-4 flex items-center justify-center shrink-0", iconBg)}> 
                     <div className={iconColor}>{icon}</div>
                 </div>
                 
                 <h3 className="text-xl font-bold text-white mb-1">
                     {name}
                 </h3>
-                <p className="text-gray-400 mb-5 text-sm"> {/* Made description smaller */}
-                    {messageLimit === -1 ? "Unlimited messages" : `${messageLimit} messages per month`}
+                <p className="text-gray-400 mb-5 text-sm"> 
+                    {reportLimit === -1 || reportLimit === "Unlimited" ? "Unlimited Reports" : `${reportLimit} Reports / month`}
                 </p>
                 
-                {/* Price */}
                 <div className="mb-6">
                     <span className="text-4xl font-bold text-white">
-                        ${price ?? 0}
+                        ${priceMonthly ?? 0} 
                     </span>
-                    {price !== null && price > 0 ? (
+                    {priceMonthly !== null && priceMonthly > 0 ? (
                         <span className="text-gray-400 ml-1">
                             /month
                         </span>
                     ) : null}
                 </div>
                 
-                <div className="space-y-3 mb-8"> {/* Reduced space */}
+                <div className="space-y-3 mb-8 flex-grow"> 
                     {features.map((feature) => (
-                        <div
-                            key={feature}
-                            className="flex items-center gap-3"
-                        >
-                            <div className={cn("rounded-full p-0.5", checkBg)}> {/* Smaller check bg */}
-                                <Check className={cn("w-3.5 h-3.5", checkColor)} /> {/* Smaller check */}
+                        <div key={feature} className="flex items-center gap-3" >
+                            <div className={cn("rounded-full p-0.5", checkBg)}> 
+                                <Check className={cn("w-3.5 h-3.5", checkColor)} /> 
                             </div>
                             <span className="text-gray-300 text-sm">
                                 {feature}
@@ -166,27 +127,34 @@ function PricingCard({
                     ))}
                 </div>
                 
-                {!isFreeTier && (
-                    <form action={checkoutAction}>
-                        <input type="hidden" name="priceId" value={priceId!} />
-                        <Button 
-                            className={cn("w-full text-white transition-all duration-300", buttonHover)}
-                            style={buttonStyle}
+                <div className="mt-auto"> 
+                    {!isFreeTier && (
+                        <form action={checkoutAction}>
+                            <input type="hidden" name="priceId" value={priceId!} />
+                            <Button 
+                                type="submit" // Ensure type is submit for form
+                                className={cn("w-full text-white transition-all duration-300", buttonHover)}
+                                style={buttonStyle}
+                            >
+                                Get Started
+                            </Button>
+                        </form>
+                    )}
+                    
+                    {isFreeTier && (
+                         <Button 
+                            asChild // Add asChild
+                            variant="outline" 
+                            className="w-full text-gray-300 border-gray-600 bg-gray-800/50 hover:bg-gray-700/50 hover:text-white transition-all duration-300"
                         >
-                            Get Started
+                            {/* Wrap with Link */}
+                            <Link href="/sign-up"> 
+                                Try Now
+                            </Link>
                         </Button>
-                    </form>
-                )}
-                
-                {isFreeTier && (
-                    <Button 
-                        variant="outline" 
-                        className="w-full text-gray-300 border-gray-600 bg-gray-800/50 hover:bg-gray-700/50 hover:text-white transition-all duration-300"
-                    >
-                        Try Now
-                    </Button>
-                )}
+                    )}
+                </div>
             </div>
         </div>
-    );
-}
+    ); // End of PricingCard return
+} // End of PricingCard function

@@ -39,9 +39,9 @@ function Header() {
         <Link href="/" className="flex items-center">
         <Image
           // Assuming logo-long.png has a transparent background and white/light elements
-          src="/logo-long.png" 
+          src="/logo-square.png" 
           alt="Logo"
-          width={300} // Adjust size as needed
+          width={100} // Adjust size as needed
           height={100}
           className="object-contain" // Ensure logo scales correctly
         />
