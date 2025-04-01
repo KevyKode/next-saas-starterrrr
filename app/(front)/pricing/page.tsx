@@ -2,21 +2,20 @@
 // --- THIS IS THE COMPLETE AND CORRECTED CONTENT ---
 
 import { checkoutAction } from '@/lib/payments/actions'; 
-import { Check, Sparkles, Star, Pencil } from 'lucide-react'; // Combine icon imports
-import { tiers, type Tier } from '@/lib/tiers'; // Use .tsx extension and import Tier
+import { Check, Sparkles, Star, Pencil } from 'lucide-react'; 
+import { tiers, type Tier } from '@/lib/tiers'; 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import Link from "next/link"; // Import Link
+import Link from "next/link"; 
 
-// Revalidation setting (optional)
 export const revalidate = 3600; 
 
-// Main Page Component Definition
 export default async function PricingPage() { 
-    // Use the imported tiers data
-    const pricingTiers: Tier[] = tiers; 
+    const pricingTiers: Tier[] = Array.isArray(tiers) ? tiers : []; 
+    if (!Array.isArray(tiers)) {
+        console.error("PricingPage Error: Imported 'tiers' is not an array!", tiers);
+    }
 
-    // Ensure the return statement is correct
     return ( 
         <div className="w-full bg-gray-950 text-white"> 
             <div className="container mx-auto max-w-7xl relative z-10 py-20 md:py-28"> 
@@ -33,7 +32,7 @@ export default async function PricingPage() {
                     
                     {/* Grid Section */}
                     <div className="grid pt-8 text-left grid-cols-1 lg:grid-cols-3 w-full gap-8">
-                        {/* Map through all tiers */}
+                        {/* Map through tiers */}
                         {pricingTiers.map((tier) => ( 
                             <div key={tier.id} className="relative"> 
                                 {tier.popular && (
@@ -47,7 +46,6 @@ export default async function PricingPage() {
                                         </span>
                                     </div>
                                 )}
-                                {/* Render the PricingCard component */}
                                 <PricingCard
                                     tier={tier}
                                     isFreeTier={tier.priceMonthly === null} 
@@ -58,11 +56,10 @@ export default async function PricingPage() {
                 </div>
             </div>
         </div>
-    ); // End of return statement
-} // End of PricingPage function
+    ); 
+} 
 
 // --- PricingCard Component (Helper within this file) ---
-// Make sure this function definition is OUTSIDE the PricingPage function
 function PricingCard({
     tier,
     isFreeTier = false,
@@ -72,17 +69,19 @@ function PricingCard({
 }) {
     const {id, name, icon, priceMonthly, description, features, popular, priceId, reportLimit} = tier; 
     
+    // --- ADDED MISSING DEFINITIONS ---
     const cardBg = popular ? 'bg-gray-900' : 'bg-gray-950/60'; 
     const cardBorder = popular ? 'border-purple-600' : 'border-gray-700/50';
     const cardShadow = popular ? 'shadow-[0_10px_30px_-10px_rgba(110,59,255,0.2)]' : 'shadow-md shadow-black/20';
-    const iconBg = popular ? 'bg-purple-600/20' : 'bg-purple-600/10';
+    const iconBg = popular ? 'bg-purple-600/20' : 'bg-purple-600/10'; // Define iconBg
     const iconColor = 'text-purple-400'; 
-    const checkBg = 'bg-purple-600/15';
-    const checkColor = 'text-purple-400';
+    const checkBg = 'bg-purple-600/15'; // Define checkBg
+    const checkColor = 'text-purple-400'; // Define checkColor
     const buttonStyle = popular 
         ? { background: 'linear-gradient(to right, var(--itt-purple, #6e3bff), var(--itt-silver, #8A95A5))' } 
         : {};
     const buttonHover = popular ? 'hover:shadow-lg hover:shadow-purple-500/30' : 'hover:bg-purple-600/20';
+    // --- END ADDED DEFINITIONS ---
 
     return (
         <div className={cn(
@@ -92,6 +91,7 @@ function PricingCard({
             cardShadow
         )}>
             <div className="p-8 flex flex-col flex-grow"> 
+                {/* Use defined iconBg */}
                 <div className={cn("w-12 h-12 rounded-full mb-4 flex items-center justify-center shrink-0", iconBg)}> 
                     <div className={iconColor}>{icon}</div>
                 </div>
@@ -115,7 +115,8 @@ function PricingCard({
                 </div>
                 
                 <div className="space-y-3 mb-8 flex-grow"> 
-                    {features.map((feature) => (
+                    {/* Use defined checkBg and checkColor */}
+                    {Array.isArray(features) ? features.map((feature) => (
                         <div key={feature} className="flex items-center gap-3" >
                             <div className={cn("rounded-full p-0.5", checkBg)}> 
                                 <Check className={cn("w-3.5 h-3.5", checkColor)} /> 
@@ -124,7 +125,7 @@ function PricingCard({
                                 {feature}
                             </span>
                         </div>
-                    ))}
+                    )) : <p className="text-sm text-red-400">Features not available.</p>} 
                 </div>
                 
                 <div className="mt-auto"> 
@@ -132,7 +133,7 @@ function PricingCard({
                         <form action={checkoutAction}>
                             <input type="hidden" name="priceId" value={priceId!} />
                             <Button 
-                                type="submit" // Ensure type is submit for form
+                                type="submit" 
                                 className={cn("w-full text-white transition-all duration-300", buttonHover)}
                                 style={buttonStyle}
                             >
@@ -143,11 +144,10 @@ function PricingCard({
                     
                     {isFreeTier && (
                          <Button 
-                            asChild // Add asChild
+                            asChild 
                             variant="outline" 
                             className="w-full text-gray-300 border-gray-600 bg-gray-800/50 hover:bg-gray-700/50 hover:text-white transition-all duration-300"
                         >
-                            {/* Wrap with Link */}
                             <Link href="/sign-up"> 
                                 Try Now
                             </Link>
@@ -156,5 +156,5 @@ function PricingCard({
                 </div>
             </div>
         </div>
-    ); // End of PricingCard return
-} // End of PricingCard function
+    ); 
+} 
