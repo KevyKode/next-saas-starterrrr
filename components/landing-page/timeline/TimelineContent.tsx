@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 // Assuming these components are in a 'components' subdirectory relative to this file
 // Double-check these paths match your actual structure
 import { GlowingEffectDemo } from "./components/glowing-effect-demo"; 
-import { DisplayCardsDemo } from "./components/display-cards-demo";
+import { ITTSuiteCardsFeature } from "./components/display-cards-itt";
 import { ShuffleCards } from "./components/testimonial-cards";
 
 // --- Main Exported Component ---
@@ -42,7 +42,7 @@ export function TimelineContent() {
             <GlowingEffectDemo />
           </MobileTimelineEntry>
           <MobileTimelineEntry title="Collaborate" delay={0.2}>
-            <DisplayCardsDemo />
+            <ITTSuiteCardsFeature />
           </MobileTimelineEntry>
           <MobileTimelineEntry title="Transform" delay={0.4}>
             <ShuffleCards />
@@ -91,7 +91,7 @@ interface TimelineEntryData {
 function DesktopTimelineContent() {
   const timelineData: TimelineEntryData[] = [
     { title: "Innovate", content: <GlowingEffectDemo /> },
-    { title: "Collaborate", content: <DisplayCardsDemo /> },
+    { title: "Collaborate", content: <ITTSuiteCardsFeature /> },
     { title: "Transform", content: <ShuffleCards /> },
   ];
 

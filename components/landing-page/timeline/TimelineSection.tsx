@@ -5,7 +5,7 @@ import React from "react";
 import { motion } from "framer-motion";
 // Imports for components within the timeline/components/ directory
 import { GlowingEffectDemo } from "./components/glowing-effect-demo"; 
-import { DisplayCardsDemo } from "./components/display-cards-demo";
+import { ITTSuiteCardsFeature } from "./components/display-cards-itt";
 import { ShuffleCards } from "./components/testimonial-cards";
 // --- CORRECTED Import Path & Syntax for AnimatedGradientBackground ---
 import AnimatedGradientBackground from "../footer/animated-gradient-background"; // Correct relative path and default import
@@ -64,7 +64,7 @@ export function TimelineSection() {
             className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-900/30"
           >
             <h3 className="text-2xl font-bold text-[#6e3bff] mb-6">Collaborate</h3>
-            <DisplayCardsDemo />
+            <ITTSuiteCardsFeature />
           </motion.div>
           
           <motion.div 
@@ -97,7 +97,7 @@ interface TimelineEntry {
 function TimelineContent() {
   const timelineData: TimelineEntry[] = [
     { title: "Innovate", content: <div className="relative"><GlowingEffectDemo /></div> },
-    { title: "Collaborate", content: <div className="relative"><DisplayCardsDemo /></div> },
+    { title: "Collaborate", content: <div className="relative"><ITTSuiteCardsFeature /></div> },
     { title: "Integrate", content: <div className="relative"><ShuffleCards /></div> },
   ];
 
