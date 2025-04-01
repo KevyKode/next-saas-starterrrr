@@ -74,7 +74,7 @@ export function TimelineSection() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-900/30"
           >
-            <h3 className="text-2xl font-bold text-[#6e3bff] mb-6">Transform</h3>
+            <h3 className="text-2xl font-bold text-[#6e3bff] mb-6">Integrate</h3>
             <ShuffleCards />
           </motion.div>
         </div>
@@ -98,7 +98,7 @@ function TimelineContent() {
   const timelineData: TimelineEntry[] = [
     { title: "Innovate", content: <div className="relative"><GlowingEffectDemo /></div> },
     { title: "Collaborate", content: <div className="relative"><DisplayCardsDemo /></div> },
-    { title: "Transform", content: <div className="relative"><ShuffleCards /></div> },
+    { title: "Integrate", content: <div className="relative"><ShuffleCards /></div> },
   ];
 
   return (

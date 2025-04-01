@@ -11,20 +11,20 @@ export function GlowingEffectDemo() {
       <GridItem
         area="md:[grid-area:1/1/2/7] xl:[grid-area:1/1/2/5]"
         icon={<Sparkles className="h-6 w-6" />}
-        title="Create workflow for specific tasks"
-        description="Create workflows in AI Tutor API that utilize one of 300+ models, contain your custom training, and perform an agentic task"
+        title="Find out what your business needs"
+        description="Have your start-up analyzed by the ITT Business Analysis Report that's an A.I powered workflow to find the best next steps to take"
       />
       <GridItem
         area="md:[grid-area:1/7/2/13] xl:[grid-area:2/1/3/5]"
         icon={<BotIcon className="h-6 w-6" />}
-        title="Build chatbots"
-        description="Build and edit chatbots with our custom system prompt without touching your code"
+        title="Figure out the finer details with the Innovator Assisstant"
+        description="Get the help you need for the next set of iterations! From correctly formed ad campaigns to baseline idea testing with the Innovator Assistant "
       />
       <GridItem
         area="md:[grid-area:2/1/3/7] xl:[grid-area:1/5/3/8]"
         icon={<Lock className="h-6 w-6" />}
-        title="Real time chat streaming"
-        description="Take advange of chat streaming for fast real time text completion response"
+        title="Team Collaboration"
+        description="Share reports and chats with your team to get them on the same page of what you need to build out next in order to get into the ITT Incubator, accelerators like Y Combinator, or even re-thinking square one!"
       />
     </ul>
   );
