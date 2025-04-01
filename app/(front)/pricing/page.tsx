@@ -51,7 +51,7 @@ export default async function PricingPage() {
                             Choose Your Plan
                         </h2>
                         <p className="text-gray-300 max-w-3xl mx-auto text-lg">
-                            Select the perfect plan for your needs with our Innovator Tool Suite
+                            Select the perfect plan for your needs with the Innovator Tool Suite
                         </p>
                     </div>
                     

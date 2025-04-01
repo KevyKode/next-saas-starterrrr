@@ -23,7 +23,7 @@ export const tiers: Tier[] = [
         '5 messages per month',
         'Basic features',
       ],
-      messageLimit: 5,
+      messageLimit: 1,
       productId: '', // No Price ID for the free tier
       priceId:''
     },
@@ -49,7 +49,7 @@ export const tiers: Tier[] = [
       priceMonthly: 30,
       description: 'For large teams who need advanced features.',
       features: [
-        'Unlimited messages',
+        'Unlimited reports and chat',
         'All Starter tier features',
         'Dedicated account manager',
       ],
