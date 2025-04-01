@@ -1,117 +1,138 @@
 // lib/db/seed.ts
-import { stripe } from '../payments/stripe';
+import { stripe } from '../payments/stripe'; 
 import { db } from './drizzle';
+// --- MODIFIED: Added 'eq' import ---
+import { eq } from 'drizzle-orm'; 
 import { users, teams, teamMembers } from './schema';
-import { hashPassword } from '@/lib/auth/session';
-import { tiers } from '@/lib/tiers'; // Import the tiers
+import { hashPassword } from '@/lib/auth/session'; 
+import { tiers } from '@/lib/tiers'; 
 
 async function createStripeProductsAndPrices() {
-    console.log('Creating Stripe products and prices...');
+    // ... (Stripe logic remains the same) ...
+    console.log('Creating/Verifying Stripe products and prices...');
 
     for (const tier of tiers) {
-        if (tier.priceMonthly !== null) { // Only create products for paid tiers
+        if (tier.priceMonthly !== null && tier.priceId?.startsWith('price_')) { 
             let product;
+            console.log(`Processing tier: ${tier.name}`);
 
-            //Check if product exists
-            const existingProducts = await stripe.products.list({
-                active: true,
-            });
-
+            const existingProducts = await stripe.products.list({ active: true });
             const existingProduct = existingProducts.data.find(p => p.name === tier.name);
 
             if(existingProduct){
                 product = existingProduct;
-                console.log(`Product ${tier.name} already exists`);
+                console.log(`Product ${tier.name} found with ID: ${product.id}`);
             } else {
+                console.log(`Creating product ${tier.name}...`);
                 product = await stripe.products.create({
                     name: tier.name,
                     description: tier.description,
                 });
-                console.log(`Product ${tier.name} created`);
+                console.log(`Product ${tier.name} created with ID: ${product.id}`);
             }
 
-
-            // Check if price exists
             const existingPrices = await stripe.prices.list({
                 product: product.id,
                 active: true,
             });
 
-            const existingPrice = existingPrices.data.find(p => p.unit_amount === tier.priceMonthly! * 100);
+            const targetAmount = tier.priceMonthly! * 100; 
+            const existingPrice = existingPrices.data.find(p => p.unit_amount === targetAmount && p.recurring?.interval === 'month');
 
             if(existingPrice){
-                console.log(`Price for ${tier.name} already exists`);
-                //Update the priceId on the tier
-                tier.priceId = existingPrice.id;
-
+                console.log(`Price for ${tier.name} ($${tier.priceMonthly}/month) found with ID: ${existingPrice.id}`);
+                tier.priceId = existingPrice.id; 
             } else {
+                console.log(`Creating price for ${tier.name} ($${tier.priceMonthly}/month)...`);
                 const price = await stripe.prices.create({
                     product: product.id,
-                    unit_amount: tier.priceMonthly! * 100, // Convert to cents
+                    unit_amount: targetAmount, 
                     currency: 'usd',
-                    recurring: {
-                        interval: 'month',
-                         trial_period_days: tier.priceMonthly === null ? 0 : 14, // No trial for free
-                    },
+                    recurring: { interval: 'month' },
                 });
-                console.log(`Price for ${tier.name} created`);
-                //Update the priceId on the tier
+                console.log(`Price for ${tier.name} created with ID: ${price.id}`);
                 tier.priceId = price.id;
             }
+            console.log(`Tier ${tier.name} using Price ID: ${tier.priceId}`);
+        } else if (tier.priceMonthly !== null) {
+             console.log(`Tier ${tier.name} already has a non-placeholder Price ID: ${tier.priceId}. Skipping Stripe creation.`);
+        } else {
+             console.log(`Tier ${tier.name} is free. Skipping Stripe creation.`);
         }
     }
-
-    console.log('Stripe products and prices created successfully.');
+    console.log('Stripe products and prices verified/created.');
 }
+
 
 async function seed() {
   const email = 'test@test.com';
-  const password = 'admin123';
-  const passwordHash = await hashPassword(password);
+  const password = 'admin123'; 
+  
+  const [existingUser] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
-  const [user] = await db
-    .insert(users)
-    .values([
-      {
-        email: email,
-        passwordHash: passwordHash,
-        role: "owner",
-      },
-    ])
-    .returning();
+  let userIdToUse: number;
 
-  console.log('Initial user created.');
+  if (existingUser) {
+    console.log(`User ${email} already exists.`);
+    userIdToUse = existingUser.id;
+  } else {
+    console.log(`Creating user ${email}...`);
+    const passwordHash = await hashPassword(password);
+    const [newUser] = await db
+      .insert(users)
+      .values([ { email: email, passwordHash: passwordHash, role: "owner" } ])
+      .returning();
+    userIdToUse = newUser.id;
+    console.log(`User ${email} created with ID: ${userIdToUse}.`);
 
-    // Find the "Free" tier
     const freeTier = tiers.find(t => t.id === 'free');
     if (!freeTier) {
-        throw new Error("Free tier not found in tiers.ts");
+        throw new Error("Free tier definition not found in tiers.tsx");
     }
 
-  const [team] = await db
-    .insert(teams)
-    .values({
-      name: 'Test Team',
-      messageLimit: freeTier.messageLimit, // Set the message limit from the tier
-      currentMessages: 5,
-    })
-    .returning();
+    // --- MODIFIED: Ensure value passed to DB is number ---
+    // Explicitly check the type before assignment
+    let limitForDb: number;
+    if (typeof freeTier.reportLimit === 'string' && freeTier.reportLimit.toLowerCase() === 'unlimited') {
+        limitForDb = -1; // Use -1 for unlimited
+    } else if (typeof freeTier.reportLimit === 'number') {
+        limitForDb = freeTier.reportLimit;
+    } else {
+        console.warn(`Invalid reportLimit found for free tier: ${freeTier.reportLimit}. Defaulting to 1.`);
+        limitForDb = 1; // Fallback default
+    }
+    // --- End Modification ---
 
-  await db.insert(teamMembers).values({
-    teamId: team.id,
-    userId: user.id,
-    role: 'owner',
-  });
+    console.log(`Creating team for user ${userIdToUse}...`);
+    const [team] = await db
+      .insert(teams)
+      .values({
+        name: `${email}'s Team`, 
+        // --- MODIFIED: Use the explicitly typed number ---
+        messageLimit: limitForDb, 
+        // --- End Modification ---
+        currentMessages: 0, 
+      })
+      .returning();
+    console.log(`Team created with ID: ${team.id}.`);
 
-  await createStripeProductsAndPrices();
+    await db.insert(teamMembers).values({
+      teamId: team.id,
+      userId: userIdToUse,
+      role: 'owner',
+    });
+    console.log(`Team member association created.`);
+  }
+
+  await createStripeProductsAndPrices(); 
 }
 
 seed()
+  .then(() => {
+    console.log('Seed process finished successfully.');
+    process.exit(0);
+  })
   .catch((error) => {
     console.error('Seed process failed:', error);
     process.exit(1);
-  })
-  .finally(() => {
-    console.log('Seed process finished. Exiting...');
-    process.exit(0);
   });
