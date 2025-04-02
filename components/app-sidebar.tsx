@@ -1,7 +1,8 @@
-// components/app-sidebar.tsx
+// File: components/app-sidebar.tsx
 'use client';
 import * as React from "react";
-import { Users, Settings, Shield, Activity, MessageCircle, GemIcon, BotIcon, Sparkles } from 'lucide-react';
+// --- MODIFIED: Updated Icons ---
+import { Users, Settings, Shield, Activity, MessageCircle, BotIcon, Sparkles, FileText, LinkIcon } from 'lucide-react'; 
 import {
   Sidebar,
   SidebarContent,
@@ -19,51 +20,60 @@ import { motion } from "framer-motion";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
 
-  // Modified nav items with ITT-specific naming and icons
+  // --- MODIFIED: Navigation Items ---
   const navItems = [
     {
-      title: "Innovation Hub",
-      url: "/dashboard/workflow",
-      icon: GemIcon,
+      title: "Readiness Report", // Renamed
+      url: "/dashboard/workflow", 
+      icon: FileText, // Changed Icon
       isActive: pathname.startsWith('/dashboard/workflow'),
     },
     {
-      title: "AI Assistant",
-      url: "/dashboard/chatbot",
-      icon: BotIcon,
-      isActive: pathname.startsWith('/dashboard/chatbot'),
+      title: "Assistant", // Renamed
+      url: "/dashboard/chat", 
+      icon: BotIcon, // Kept Icon
+      isActive: pathname.startsWith('/dashboard/chat'),
     },
+    // { // REMOVED Community Item
+    //   title: "Community",
+    //   url: "/dashboard/streaming", // This URL might need removal/redirect if page is gone
+    //   icon: MessageCircle,
+    //   isActive: pathname.startsWith('/dashboard/streaming'),
+    // },
     {
-      title: "Community",
-      url: "/dashboard/streaming",
-      icon: MessageCircle,
-      isActive: pathname.startsWith('/dashboard/streaming'),
-    },
-    {
-      title: "Collaborators",
+      title: "Team",
       url: '/dashboard/team',
       icon: Users,
       isActive: pathname.startsWith('/dashboard/team'),
     },
     {
-      title: "Preferences",
-      url: '/dashboard/general',
+      title: "Preferences", // Kept - maps to general settings
+      url: '/dashboard/settings', // Assuming general settings path
       icon: Settings,
-      isActive: pathname.startsWith('/dashboard/general'),
+      isActive: pathname.startsWith('/dashboard/settings'), 
     },
     {
       title: "Analytics",
-      url: '/dashboard/activity',
+      url: '/dashboard/activity', // Assuming activity log path
       icon: Activity,
       isActive: pathname.startsWith('/dashboard/activity'),
     },
     {
-      title: "Security",
-      url: '/dashboard/security',
+      title: "Security", // Kept - maps to security settings
+      url: '/dashboard/security', // Assuming security settings path
       icon: Shield,
       isActive: pathname.startsWith('/dashboard/security'),
     },
+     // --- ADDED: Link to ITT Community Website ---
+     {
+      title: "ITT Community",
+      url: "https://innovatorsthinktank.com/community", // External Link
+      icon: LinkIcon, // Changed Icon
+      isExternal: true, // Add flag to handle external links if needed in NavMain
+      isActive: false, // External links usually aren't "active"
+    },
   ];
+  // --- End Modification ---
 
   return (
     <Sidebar 
@@ -76,7 +86,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <div className="absolute bottom-0 right-0 w-full h-64 bg-gradient-to-br from-[#3b7dff]/5 to-transparent rounded-full blur-3xl translate-y-1/3"></div>
       </div>
       
-      {/* Enhanced header with animation */}
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -87,16 +97,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <Logo />
             <motion.div
               className="absolute -top-1 -right-1 text-[#6e3bff]"
-              animate={{ 
-                opacity: [0.5, 1, 0.5],
-                scale: [0.8, 1.2, 0.8],
-                rotate: [0, 15, 0]
-              }}
-              transition={{ 
-                duration: 3,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
+              animate={{ opacity: [0.5, 1, 0.5], scale: [0.8, 1.2, 0.8], rotate: [0, 15, 0] }}
+              transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
             >
               <Sparkles size={16} />
             </motion.div>
@@ -112,6 +114,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarHeader>
       </motion.div>
       
+      {/* Content */}
       <SidebarContent className="flex flex-col flex-1 relative z-10">
         <motion.div 
           className="flex-1"
@@ -119,7 +122,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1, duration: 0.3 }}
         >
-          <NavMain items={navItems} />
+          {/* Pass updated items to NavMain */}
+          <NavMain items={navItems} /> 
         </motion.div>
         
         <motion.div 

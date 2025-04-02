@@ -1,43 +1,33 @@
-// File: app/layout.tsx
-import './globals.css'; // Import the global styles
+// File: app/layout.tsx 
+// --- Ensure this is minimal ---
+import './globals.css'; 
 import type { Metadata, Viewport } from 'next';
-import { Manrope } from 'next/font/google'; // Use your actual font import
-import { UserProvider } from '@/lib/auth'; // Assuming path is correct
-import { getUser } from '@/lib/db/queries'; // Assuming path is correct
-import { cn } from '@/lib/utils'; // Assuming path is correct
+import { Manrope } from 'next/font/google'; 
+import { UserProvider } from '@/lib/auth'; 
+import { getUser } from '@/lib/db/queries'; 
+import { cn } from '@/lib/utils'; 
 
-export const metadata: Metadata = {
-  title: 'Innovators Think Tank', // Updated Title
-  description: 'Transforming Ideas To Impact', // Updated Description
-};
+export const metadata: Metadata = { /* ... */ };
+export const viewport: Viewport = { /* ... */ };
 
-export const viewport: Viewport = {
-  maximumScale: 1,
-};
-
-// Setup font with CSS variable
-const manrope = Manrope({ 
-  subsets: ['latin'], 
-  variable: '--font-manrope' // Define CSS variable name
-}); 
+const manrope = Manrope({ subsets: ['latin'], variable: '--font-manrope' }); 
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Fetch user data if needed for context
   let userPromise = getUser(); 
 
   return (
-    // Apply 'dark' class to enable dark theme via globals.css
-    // Apply font variable class
-    // Remove specific theme classes (bg-*, text-*) - let globals.css handle it
-    // Add suppressHydrationWarning
+    // Apply dark class and font
     <html lang="en" className={cn("dark font-sans", manrope.variable)} suppressHydrationWarning> 
-      {/* Remove theme classes from body */}
+      {/* Body should NOT have dashboard-specific layout components */}
       <body className="min-h-[100dvh]"> 
-        <UserProvider userPromise={userPromise}>{children}</UserProvider>
+        {/* UserProvider wraps everything */}
+        <UserProvider userPromise={userPromise}>
+          {children} {/* This renders the content of nested layouts/pages */}
+        </UserProvider>
       </body>
     </html>
   );
