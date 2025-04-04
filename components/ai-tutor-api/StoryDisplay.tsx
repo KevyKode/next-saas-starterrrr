@@ -4,7 +4,7 @@ import { marked } from 'marked';
 import { useState, useEffect } from 'react';
 
 interface StoryDisplayProps {
-  result: any; // Make this more flexible to handle different response formats
+  result: any; // More flexible to handle different response formats
 }
 
 const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
@@ -90,12 +90,12 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
                     htmlContent = `<p>${content.replace(/\n/g, '<br>')}</p>`;
                 }
                 
-                // Apply some additional styling to section headers and recommendations
+                // Apply some additional styling to section headers and recommendations with more eye-friendly colors
                 htmlContent = htmlContent
                     .replace(/(Problem-Solution Fit|Market Opportunity|Business Model Viability|Product Readiness &amp; Traction|Competitive Defensibility|Financial Metrics|Competitive Landscape|Strategic Next Steps|Final Note)(\s*\(\d+\/\d+\))?/g, 
-                        '<h2 class="text-xl font-bold mt-6 mb-3 text-purple-700">$1$2</h2>')
+                        '<h2 class="text-xl font-bold mt-6 mb-3 text-indigo-400">$1$2</h2>')
                     .replace(/(Key Metrics|Recommendations|Competitive Insights|Unit Economics Analysis|Current State|Strategic Next Steps|Priority Fixes|Recommended Programs)/g, 
-                        '<h3 class="text-lg font-semibold mt-4 mb-2 text-gray-800">$1</h3>')
+                        '<h3 class="text-lg font-semibold mt-4 mb-2 text-blue-400">$1</h3>')
                     .replace(/🔹|🔸|💡|⚠️|✅|❌|⛏️|📊|1️⃣|2️⃣|▸|‣/g, 
                         '<span class="inline-block mr-2">$&</span>');
                 
@@ -118,13 +118,18 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
     }, [result]);
 
     return (
-        <div className="glass-morphism p-8 rounded-xl shadow-xl backdrop-blur-lg bg-white/30">
+        <div className="bg-gray-900/90 p-8 rounded-xl shadow-xl text-gray-300">
             <div className="report-container">
+                {/* Report title with softer gradient */}
+                <h1 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
+                    ITT Readiness Report
+                </h1>
+                
                 {/* The entire report content as a single block */}
-                <div className="prose prose-lg max-w-none" 
+                <div className="prose prose-lg max-w-none prose-invert prose-headings:text-blue-400 prose-a:text-indigo-400" 
                     dangerouslySetInnerHTML={{ __html: formattedResult }} />
                 
-                {/* Download Button */}
+                {/* Download Button - softer colors */}
                 <div className="mt-8 flex justify-end">
                     <button 
                         onClick={() => {
@@ -140,7 +145,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
                             document.body.removeChild(a);
                             URL.revokeObjectURL(url);
                         }}
-                        className="py-2 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 flex items-center"
+                        className="py-2 px-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 flex items-center"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -151,9 +156,9 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
             </div>
             
             {debugInfo && (
-                <div className="mt-6 p-4 bg-gray-100 rounded-lg text-sm overflow-auto">
-                    <h3 className="font-bold mb-2 text-red-600">Debug Information:</h3>
-                    <pre className="whitespace-pre-wrap">{debugInfo}</pre>
+                <div className="mt-6 p-4 bg-gray-800 rounded-lg text-sm overflow-auto border border-gray-700">
+                    <h3 className="font-bold mb-2 text-blue-400">Debug Information:</h3>
+                    <pre className="whitespace-pre-wrap text-gray-400">{debugInfo}</pre>
                 </div>
             )}
         </div>
