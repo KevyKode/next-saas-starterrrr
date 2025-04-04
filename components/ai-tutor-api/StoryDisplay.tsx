@@ -4,10 +4,7 @@ import { marked } from 'marked';
 import { useState, useEffect } from 'react';
 
 interface StoryDisplayProps {
-  result: {
-    result?: string;
-    success?: boolean;
-  };
+  result: any; // Make this more flexible to handle different response formats
 }
 
 const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
@@ -20,89 +17,106 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
         
         const processContent = async () => {
             try {
-                // Check if we have the expected data structure
-                if (result && result.result) {
-                    console.log('Found result.result, processing...');
+                // Handle different possible result formats
+                let content = '';
+                
+                if (typeof result === 'string') {
+                    // Direct string result
+                    content = result.trim();
+                } else if (result && typeof result.result === 'string') {
+                    // Object with result property as string
+                    content = result.result.trim();
+                } else if (result && typeof result === 'object') {
+                    // Try to stringify the entire object if it's not in expected format
+                    content = JSON.stringify(result, null, 2);
                     
-                    // Clean up the content
-                    let content = result.result.trim();
-                    
-                    // Remove <think> tag and thinking content if present
-                    content = content.replace(/<think>[\s\S]*?<\/think>|<think>[\s\S]*/g, '');
-                    
-                    // Remove any reasoning text that shouldn't be in the report
-                    content = content.replace(/Okay,\s*let\s*me\s*tackle\s*this\s*query[\s\S]*?sections\s*with\s*specific\s*metrics[^.]*\./g, '');
-                    content = content.replace(/Starting with[\s\S]*?:/g, '');
-                    content = content.replace(/I'll analyze[\s\S]*?:/g, '');
-                    content = content.replace(/Now\s*scoring\s*each\s*section[\s\S]*?:/g, '');
-                    content = content.replace(/Need\s*to\s*check\s*if[\s\S]*?\./, '');
-                    content = content.replace(/The\s*founder\s*is\s*using\s*AI\s*to[\s\S]*?clear\s*problem\./g, '');
-                    content = content.replace(/They're\s*targeting\s*skaters\s*globally[\s\S]*?trends\./g, '');
-                    
-                    // Clean up title and headers
-                    content = content.replace(/^\*\*\s*March \d+, \d+/, 'ITT Business-Readiness Report\n\nDate: March 22, 2025');
-                    content = content.replace(/^Start-Up Readiness Report/, 'ITT Business-Readiness Report');
-                    
-                    // Fix readiness score formatting
-                    content = content.replace(/Readiness\s*Score:?\s*(?:Calculation[^\n]*|<[^>]*>)/g, 'Final Score: 70/100 → Accelerator Ready');
-                    
-                    // Remove citation brackets [1], [2], etc.
-                    content = content.replace(/\[\d+\]/g, '');
-                    
-                    // Clean HTML tags from content
-                    content = content.replace(/<[^>]*>/g, '');
-                    
-                    // Store the cleaned content for the download button
-                    setCleanedContent(content);
-                    
-                    // Format as HTML
-                    let htmlContent = '';
-                    
-                    try {
-                        // First try with marked.parse
-                        if (typeof marked.parse === 'function') {
-                            htmlContent = await Promise.resolve(marked.parse(content));
-                        } else {
-                            // Fallback to basic HTML formatting
-                            htmlContent = content
-                                .replace(/\n\n/g, '</p><p>')
-                                .replace(/\n/g, '<br>')
-                                .replace(/^/, '<p>')
-                                .replace(/$/, '</p>');
-                        }
-                    } catch (markdownError) {
-                        console.error('Error parsing markdown:', markdownError);
-                        // Fallback to simple formatting
-                        htmlContent = `<p>${content.replace(/\n/g, '<br>')}</p>`;
+                    // Check if it's possibly a raw AI response text
+                    if (content.includes("Readiness Report") || 
+                        content.includes("Problem-Solution Fit") || 
+                        content.includes("Market Opportunity")) {
+                        // This looks like a report, use it directly
+                        content = content;
                     }
-                    
-                    // Apply some additional styling to section headers and recommendations
-                    htmlContent = htmlContent
-                        .replace(/(Problem-Solution Fit|Market Opportunity|Business Model Viability|Product Readiness &amp; Traction|Competitive Defensibility|Financial Metrics|Competitive Landscape|Strategic Next Steps|Final Note)(\s*\(\d+\/\d+\))?/g, 
-                            '<h2 class="text-xl font-bold mt-6 mb-3 text-purple-700">$1$2</h2>')
-                        .replace(/(Key Metrics|Recommendations|Competitive Insights|Unit Economics Analysis|Current State|Strategic Next Steps|Priority Fixes|Recommended Programs)/g, 
-                            '<h3 class="text-lg font-semibold mt-4 mb-2 text-gray-800">$1</h3>')
-                        .replace(/🔹|🔸|💡|⚠️|✅|❌|⛏️|📊|1️⃣|2️⃣|▸|‣/g, 
-                            '<span class="inline-block mr-2">$&</span>');
-                    
-                    setFormattedResult(htmlContent);
-                    setDebugInfo('');
                 } else {
-                    console.error('Invalid result format:', result);
-                    setFormattedResult('<p>Error: Received data is not in the expected format.</p>');
-                    setDebugInfo(JSON.stringify(result, null, 2));
+                    throw new Error('Unrecognized result format');
                 }
+                
+                // Remove <think> tag and thinking content if present
+                content = content.replace(/<think>[\s\S]*?<\/think>|<think>[\s\S]*/g, '');
+                
+                // Remove any reasoning text that shouldn't be in the report
+                content = content.replace(/Okay,\s*let\s*me\s*tackle\s*this\s*query[\s\S]*?sections\s*with\s*specific\s*metrics[^.]*\./g, '');
+                content = content.replace(/Starting with[\s\S]*?:/g, '');
+                content = content.replace(/I'll analyze[\s\S]*?:/g, '');
+                content = content.replace(/Now\s*scoring\s*each\s*section[\s\S]*?:/g, '');
+                content = content.replace(/Need\s*to\s*check\s*if[\s\S]*?\./, '');
+                content = content.replace(/The\s*founder\s*is\s*using\s*AI\s*to[\s\S]*?clear\s*problem\./g, '');
+                content = content.replace(/They're\s*targeting\s*skaters\s*globally[\s\S]*?trends\./g, '');
+                
+                // Clean up title and headers
+                content = content.replace(/^\*\*\s*March \d+, \d+/, 'ITT Business-Readiness Report\n\nDate: March 22, 2025');
+                content = content.replace(/^Start-Up Readiness Report/, 'ITT Business-Readiness Report');
+                
+                // Fix readiness score formatting
+                content = content.replace(/Readiness\s*Score:?\s*(?:Calculation[^\n]*|<[^>]*>)/g, 'Final Score: 70/100 → Accelerator Ready');
+                
+                // Remove citation brackets [1], [2], etc.
+                content = content.replace(/\[\d+\]/g, '');
+                
+                // Clean HTML tags from content
+                content = content.replace(/<[^>]*>/g, '');
+                
+                // Store the cleaned content for the download button
+                setCleanedContent(content);
+                
+                // Format as HTML
+                let htmlContent = '';
+                
+                try {
+                    // First try with marked.parse
+                    if (typeof marked.parse === 'function') {
+                        htmlContent = await Promise.resolve(marked.parse(content));
+                    } else {
+                        // Fallback to basic HTML formatting
+                        htmlContent = content
+                            .replace(/\n\n/g, '</p><p>')
+                            .replace(/\n/g, '<br>')
+                            .replace(/^/, '<p>')
+                            .replace(/$/, '</p>');
+                    }
+                } catch (markdownError) {
+                    console.error('Error parsing markdown:', markdownError);
+                    // Fallback to simple formatting
+                    htmlContent = `<p>${content.replace(/\n/g, '<br>')}</p>`;
+                }
+                
+                // Apply some additional styling to section headers and recommendations
+                htmlContent = htmlContent
+                    .replace(/(Problem-Solution Fit|Market Opportunity|Business Model Viability|Product Readiness &amp; Traction|Competitive Defensibility|Financial Metrics|Competitive Landscape|Strategic Next Steps|Final Note)(\s*\(\d+\/\d+\))?/g, 
+                        '<h2 class="text-xl font-bold mt-6 mb-3 text-purple-700">$1$2</h2>')
+                    .replace(/(Key Metrics|Recommendations|Competitive Insights|Unit Economics Analysis|Current State|Strategic Next Steps|Priority Fixes|Recommended Programs)/g, 
+                        '<h3 class="text-lg font-semibold mt-4 mb-2 text-gray-800">$1</h3>')
+                    .replace(/🔹|🔸|💡|⚠️|✅|❌|⛏️|📊|1️⃣|2️⃣|▸|‣/g, 
+                        '<span class="inline-block mr-2">$&</span>');
+                
+                setFormattedResult(htmlContent);
+                setDebugInfo('');
             } catch (error) {
                 console.error('Error in StoryDisplay:', error);
-                setFormattedResult('<p>Error formatting the report. Please check the console for details.</p>');
-                setDebugInfo(error instanceof Error ? error.message : String(error));
+                setFormattedResult('<p>Error: Received data is not in the expected format.</p>');
+                // Show the actual result for debugging
+                if (result) {
+                    const debugText = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+                    setDebugInfo(debugText);
+                } else {
+                    setDebugInfo(error instanceof Error ? error.message : String(error));
+                }
             }
         };
         
         processContent();
     }, [result]);
 
-    // Render the entire report as a single continuous document
     return (
         <div className="glass-morphism p-8 rounded-xl shadow-xl backdrop-blur-lg bg-white/30">
             <div className="report-container">

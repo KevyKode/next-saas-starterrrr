@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import StoryDisplay from '@/components/ai-tutor-api/StoryDisplay'; 
 import Link from 'next/link';
-// --- MODIFIED: Removed WorkflowHistoryDrawerProps from import ---
 import { WorkflowHistoryDrawer } from '@/components/workflow/WorkflowHistoryDrawer'; 
 import { cn } from '@/lib/utils'; 
 import React from 'react'; 
@@ -60,12 +59,108 @@ export default function Workflow() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reportId]); 
 
-    // Helper Functions (definitions assumed correct from previous steps)
-    const startProcessing = async () => { /* ... */ };
-    const startPolling = () => { /* ... */ };
-    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => { /* ... */ };
-    const handleSubmit = async (e: React.FormEvent) => { /* ... */ };
-    const handleSelectHistory = (input: string, output: string) => { /* ... */ };
+    const startProcessing = async () => {
+        setLoading(true);
+        setError('');
+        
+        try {
+          // Use the existing /api/run endpoint
+          const response = await fetch('/api/run', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+          });
+          
+          // Handle errors
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to generate report');
+          }
+          
+          // Get the response text
+          const responseText = await response.text();
+          
+          // Try to parse as JSON if possible
+          let data;
+          try {
+            data = JSON.parse(responseText);
+          } catch (e) {
+            // If not valid JSON, use the raw text as result
+            data = responseText;
+          }
+          
+          // Set result directly
+          setResult(data);
+          setLoading(false);
+          
+        } catch (err: any) {
+          console.error('Error processing report:', err);
+          setError(err.message || 'An error occurred during report generation');
+          setLoading(false);
+        }
+      };
+      
+    const startPolling = () => {
+        pollingIntervalRef.current = setInterval(async () => {
+          if (!reportId) return;
+          
+          try {
+            // Changed from '/api/report/status/' to '/api/business-report-status/'
+            const response = await fetch(`/api/business-report-status/${reportId}`);
+            
+            // Handle non-JSON responses
+            const responseText = await response.text();
+            let data;
+            
+            try {
+              data = JSON.parse(responseText);
+            } catch (parseError) {
+              console.error('Failed to parse status response as JSON:', responseText);
+              throw new Error('Server returned an invalid status response format');
+            }
+            
+            setReportStatus(data.status);
+            
+            if (data.status === 'completed') {
+              setResult(data.result);
+              setLoading(false);
+              if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+            } else if (data.status === 'failed') {
+              setError('Report generation failed. Please try again.');
+              setLoading(false);
+              if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+            }
+          } catch (err) {
+            console.error('Polling error:', err);
+          }
+        }, 3000); // Poll every 3 seconds
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+          ...prev,
+          [name]: value
+        }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await startProcessing();
+    };
+      
+    const handleSelectHistory = (input: string, output: string) => {
+        try {
+          const parsedInput = JSON.parse(input);
+          setFormData(parsedInput);
+          setResult(output);
+        } catch (err) {
+          console.error('Error parsing history input:', err);
+          setError('Could not load history item');
+        }
+    };
 
     return (
         <div className="w-full"> 

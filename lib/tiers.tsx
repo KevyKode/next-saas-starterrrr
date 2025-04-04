@@ -23,7 +23,7 @@ export const tiers: Tier[] = [
         name: 'Free',
         icon: <Pencil className="w-6 h-6" />, 
         priceMonthly: null,
-        reportLimit: 1, 
+        reportLimit: "Unlimited", 
         description: 'Test the waters with basic analysis.',
         features: [ '1 Report per month', 'Standard AI model', 'Community access' ],
         popular: false,
