@@ -1,10 +1,12 @@
+// app/api/run/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { checkMessageLimit, incrementMessageCount, saveWorkflowHistory } from '@/lib/db/utils';
 
-// Add maxDuration config for Railway to allow longer execution time
+// Tell Railway this function needs more time and resources
 export const config = {
-  maxDuration: 300, // 5 minutes in seconds
+  maxDuration: 120, // 2 minutes
+  memory: 1024, // 1GB of memory
 };
 
 export async function POST(req: NextRequest) {
@@ -43,9 +45,11 @@ export async function POST(req: NextRequest) {
 
     // Set a longer timeout for the fetch request
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 240000); // 4 minute timeout
+    const timeoutId = setTimeout(() => controller.abort(), 100000); // 100 seconds timeout
 
     try {
+      console.log('Starting API request at:', new Date().toISOString());
+      
       // Call the business report workflow API endpoint with timeout
       const response = await fetch(
         'https://aitutor-api.vercel.app/api/v1/run/wf_z17kkxc4nnupcimdpk6zi4zm',
@@ -56,15 +60,20 @@ export async function POST(req: NextRequest) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
-          signal: controller.signal
+          signal: controller.signal,
+          // Add longer timeout hints
+          keepalive: true,
         }
       );
 
+      console.log('API request completed at:', new Date().toISOString());
+      
       // Clear the timeout since the request completed
       clearTimeout(timeoutId);
 
       // Try to get the response as text first
       const responseText = await response.text();
+      console.log('Response text length:', responseText.length);
 
       // Try to parse as JSON, but if it fails, wrap in a result object
       let data;
@@ -82,6 +91,8 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      console.log('Processing successful response at:', new Date().toISOString());
+      
       // Increment the team's message count after successful API call
       await incrementMessageCount(team.id, 1);
 
@@ -93,6 +104,8 @@ export async function POST(req: NextRequest) {
         typeof data === 'object' ? JSON.stringify(data) : data
       );
 
+      console.log('Returning response at:', new Date().toISOString());
+      
       // Return the response data
       return NextResponse.json(data, { status: 200 });
     } catch (error: unknown) {
@@ -100,7 +113,8 @@ export async function POST(req: NextRequest) {
       
       // Handle AbortError (timeout) separately
       if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('API request timed out after 4 minutes');
+        console.error('API request timed out');
+        throw new Error('API request timed out after 100 seconds');
       }
       
       throw error; // Re-throw other errors
