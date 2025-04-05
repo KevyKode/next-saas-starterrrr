@@ -95,20 +95,21 @@ export async function POST(req: NextRequest) {
 
       // Return the response data
       return NextResponse.json(data, { status: 200 });
-    } catch (fetchError) {
+    } catch (error: unknown) {
       clearTimeout(timeoutId);
       
       // Handle AbortError (timeout) separately
-      if (fetchError.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         throw new Error('API request timed out after 4 minutes');
       }
       
-      throw fetchError; // Re-throw other errors
+      throw error; // Re-throw other errors
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Report API Error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Internal Server Error: ' + (error.message || String(error)) },
+      { error: 'Internal Server Error: ' + errorMessage },
       { status: 500 }
     );
   }
