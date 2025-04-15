@@ -167,7 +167,7 @@ export default function Workflow() {
             <div className="max-w-5xl mx-auto">
                 <div className="text-center mb-8 pt-4 pb-8"> 
                     <h1 className="text-4xl md:text-5xl font-bold text-itt-gradient inline-block"> 
-                        ITT Readiness Report 
+                        ITT Assessment 
                     </h1>
                 </div>
 

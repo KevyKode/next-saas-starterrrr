@@ -10,9 +10,8 @@ import { cn } from "@/lib/utils";
 const ittSuiteCards = [
   { // Card 3 (Back - Top Left relative to corner)
     icon: <Library className="w-5 h-5 text-cyan-300" />, 
-    title: "Resource Hub",
-    description: "Access tools, templates, and learning materials.",
-    date: "Knowledge Base",
+    title: "Customized Growth Strategies",
+    description: "Receive a comprehensive report featuring personalized growth strategies and improvement recommendations.",
     iconBgClassName: "bg-cyan-600/20",
     titleClassName: "text-cyan-400",
     className: cn(
@@ -27,9 +26,8 @@ const ittSuiteCards = [
   },
   { // Card 2 (Middle - Up Left relative to corner)
     icon: <Network className="w-5 h-5 text-blue-300" />, 
-    title: "Incubator Network",
-    description: "Connect with mentors, peers, and investors.",
-    date: "Community",
+    title: "Assessment Score",
+    description: "Get a clear performance score that indicates your business’s readiness for the next phase. Whether you need to refine your strategies or are ready to pitch to investors, our scoring system provides a clear indicator of your position.",
     iconBgClassName: "bg-blue-600/20",
     titleClassName: "text-blue-400",
     className: cn(
@@ -44,8 +42,8 @@ const ittSuiteCards = [
   },
   { // Card 1 (Front - Closest to corner)
     icon: <BrainCircuit className="w-5 h-5 text-purple-300" />, 
-    title: "Business Analysis Report",
-    description: "Data-driven insights to help your startup's scale.",
+    title: "Team Collaboration",
+    description: "Share reports and chats with your team or client to ensure everyone is aligned on the next steps. Collaborate effectively to build out what you need to get into the ITT Incubator or even re-thinking square one.",
     date: "Readiness Assessment", 
     iconBgClassName: "bg-purple-600/20", 
     titleClassName: "text-purple-400", 

@@ -36,7 +36,7 @@ export function TimelineSection() {
                How It Works
              </h2>
              <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
-               The ITT Readiness Report helps transform ideas into real-world impact.
+             The ITT Assessment is an innovative AI-powered SaaS tool designed to help businesses identify their current market position and uncover growth opportunities. By analyzing your business data, our system generates a detailed report with tailored recommendations for improvement and a performance score to guide your next steps.
              </p>
            </div>
            <motion.div /* ... */ >
@@ -83,7 +83,7 @@ function TimelineContent() {
            How It Works
          </h2>
          <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
-           The ITT Readiness Report helps transform ideas into real-world impact through these key stages.
+         The ITT Assessment is an innovative AI-powered SaaS tool designed to help businesses identify their current market position and uncover growth opportunities. By analyzing your business data, our system generates a detailed report with tailored recommendations for improvement and a performance score to guide your next steps.
          </p>
        </div>
        

@@ -97,7 +97,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     return createCheckoutSession({ team: foundTeam, priceId });
   }
 
-  redirect('/dashboard');
+  redirect('/dashboard/workflow');
 });
 
 const signUpSchema = z.object({

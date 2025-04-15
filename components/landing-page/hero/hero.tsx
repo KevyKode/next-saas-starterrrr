@@ -14,7 +14,7 @@ import Link from "next/link";
 function Hero() {
   const [titleNumber, setTitleNumber] = useState(0);
   const titles = useMemo(
-    () => ["innovators", "creators", "entrepreneurs", "visionaries"],
+    () => ["innovators", "start-ups", "creators", "entrepreneurs", "visionaries"],
     []
   );
   const confettiRef = useRef<ConfettiRef>(null);
@@ -66,13 +66,13 @@ function Hero() {
             <h1 className="text-5xl md:text-7xl max-w-4xl tracking-tighter text-center font-bold"> 
               {/* Apply gradient class from globals.css */}
               <span className="text-itt-gradient"> 
-                ITT Readiness Report
+                ITT Assessment
               </span>
             </h1>
             
             {/* Sub-headline with rotating words */}
             <p className="text-lg md:text-xl leading-relaxed tracking-tight text-gray-300 max-w-2xl text-center mt-4 h-8 relative flex justify-center items-center"> 
-              <span className="mr-2">Welcome to the community for</span> 
+              <span className="mr-2">Unlock Your Business Potential with the ITT Assessment for</span> 
               <span className="inline-block w-36 text-left relative h-full"> 
                 {titles.map((title, index) => (
                   <motion.span

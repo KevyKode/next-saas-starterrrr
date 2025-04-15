@@ -11,20 +11,20 @@ export function GlowingEffectDemo() {
       <GridItem
         area="md:[grid-area:1/1/2/7] xl:[grid-area:1/1/2/5]"
         icon={<Sparkles className="h-6 w-6" />}
-        title="Find out what your business needs"
-        description="Have your start-up analyzed by the ITT Business Analysis Report that's an A.I powered workflow to find the best next steps to take"
+        title="Find Out What Your Business Needs"
+        description="Have your start-up analyzed by the ITT Assessment, an AI-powered workflow designed to identify the best next steps for your business. Our advanced algorithms provide in-depth insights tailored to your unique situation, ensuring you have a clear path forward."
       />
       <GridItem
         area="md:[grid-area:1/7/2/13] xl:[grid-area:2/1/3/5]"
         icon={<BotIcon className="h-6 w-6" />}
-        title="Figure out the finer details with the Innovator Assisstant"
-        description="Get the help you need for the next set of iterations! From correctly formed ad campaigns to baseline idea testing with the Innovator Assistant "
+        title="Team Collaboration"
+        description="Share reports and chats with your team to ensure everyone is aligned on the next steps. Collaborate effectively to refine your strategies and accelerate your business growth. Join the ITT Saturday events for hands-on support and industry-leading expertise."
       />
       <GridItem
         area="md:[grid-area:2/1/3/7] xl:[grid-area:1/5/3/8]"
         icon={<Lock className="h-6 w-6" />}
-        title="Team Collaboration"
-        description="Share reports and chats with your team to get them on the same page of what you need to build out next in order to get into the ITT Incubator, accelerators like Y Combinator, or even re-thinking square one!"
+        title="Innovator Assistant"
+        description="Figure out the finer details with the Innovator Assistant, our intelligent chatbot. This tool helps you understand your report, take actionable steps, and guides you through the process using advanced reasoning and support. Whether it’s forming ad campaigns or testing baseline ideas, the Innovator Assistant is here to help."
       />
     </ul>
   );

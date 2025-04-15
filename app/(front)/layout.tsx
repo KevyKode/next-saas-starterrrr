@@ -35,10 +35,10 @@ function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center"> 
         <Link href="/" className="flex items-center">
         <Image
-          src="/logo-long.png" 
+          src="/logo-square.png" 
           alt="Logo"
-          width={300} 
-          height={100}
+          width={90} 
+          height={90}
           className="object-contain h-auto" 
           priority 
         />

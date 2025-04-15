@@ -117,10 +117,10 @@ export default async function PricingPage() { // START OF PricingPage FUNCTION
                     {/* Heading Section */}
                     <div className="flex gap-2 flex-col mb-8">
                         <h2 className="text-4xl md:text-6xl font-bold mb-4 text-itt-gradient"> 
-                            Choose Your Plan
+                            Get Started Today!
                         </h2>
                         <p className="text-gray-300 max-w-3xl mx-auto text-lg">
-                            Select the perfect plan for your needs with the ITT Readiness Report
+                            Select the perfect plan for your needs with the Innovator Suite
                         </p>
                     </div>
                     
