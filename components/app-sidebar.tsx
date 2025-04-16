@@ -23,7 +23,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // --- MODIFIED: Navigation Items ---
   const navItems = [
     {
-      title: "Readiness Report", // Renamed
+      title: "Assessment", // Renamed
       url: "/dashboard/workflow", 
       icon: FileText, // Changed Icon
       isActive: pathname.startsWith('/dashboard/workflow'),

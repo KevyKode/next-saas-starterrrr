@@ -1,70 +1,102 @@
-// File: components/landing-page/timeline/components/display-cards-itt.tsx 
+// File: components/landing-page/timeline/components/display-cards-itt.tsx
 "use client";
 
 import React from "react";
 import { DisplayCards } from "./display-cards"; 
 import { BrainCircuit, Network, Library } from "lucide-react"; 
 import { cn } from "@/lib/utils"; 
+import Image from "next/image";
 
-// --- MODIFIED: Card definitions for bottom-right positioning ---
+// --- MODIFIED: Card definitions with images and rotation animation ---
 const ittSuiteCards = [
-  { // Card 3 (Back - Top Left relative to corner)
+  { // Card 3 (Back)
     icon: <Library className="w-5 h-5 text-cyan-300" />, 
-    title: "Customized Growth Strategies",
-    description: "Receive a comprehensive report featuring personalized growth strategies and improvement recommendations.",
+    title: "Growth Strategy Report",
+    // Screenshot example
+    description: (
+      <div className="w-full h-32 relative overflow-hidden rounded-md">
+        <Image 
+          src="/images/report-example.png" // This is the image path
+          alt="Strategy Report Example"
+          fill
+          className="object-contain"
+        />
+      </div>
+    ),
     iconBgClassName: "bg-cyan-600/20",
     titleClassName: "text-cyan-400",
+    date: null,
     className: cn(
-      "absolute bottom-0 right-0", // Anchor bottom-right
-      // Initial State: Fanned up-left, titles visible
-      "-rotate-[10deg] -translate-x-[6rem] -translate-y-[7rem]", 
-      // Hover State: Move further up-left
-      "group-hover:-rotate-[12deg] group-hover:-translate-x-[10rem] group-hover:-translate-y-[22rem]", 
+      "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2", // Center positioning
+      "-rotate-[20deg] scale-90", // Initial rotation
+      "group-hover:rotate-[30deg] group-hover:scale-95", // Rotation on hover (no translation)
       "z-10", 
-      "border-cyan-900/30 bg-gray-950/80 backdrop-blur-md" 
+      "border-cyan-900/30 bg-gray-950/80 backdrop-blur-md shadow-lg",
+      "h-auto", // Allow height to adjust based on content
+      "transition-all duration-500 ease-in-out" // Smoother transition
     ),
   },
-  { // Card 2 (Middle - Up Left relative to corner)
+  { // Card 2 (Middle)
     icon: <Network className="w-5 h-5 text-blue-300" />, 
-    title: "Assessment Score",
-    description: "Get a clear performance score that indicates your business’s readiness for the next phase. Whether you need to refine your strategies or are ready to pitch to investors, our scoring system provides a clear indicator of your position.",
+    title: "Assessment Dashboard",
+    // Screenshot example
+    description: (
+      <div className="w-full h-32 relative overflow-hidden rounded-md">
+        <Image 
+          src="/images/dashboard-example.png" // This is the image path
+          alt="Assessment Dashboard"
+          fill
+          className="object-contain"
+        />
+      </div>
+    ),
     iconBgClassName: "bg-blue-600/20",
     titleClassName: "text-blue-400",
+    date: null,
     className: cn(
-      "absolute bottom-0 right-0", // Anchor bottom-right
-      // Initial State: Fanned slightly up-left, titles visible
-      "-rotate-[5deg] -translate-x-[3rem] -translate-y-[3.5rem]", 
-      // Hover State: Move further up-left
-      "group-hover:-rotate-[6deg] group-hover:-translate-x-[5rem] group-hover:-translate-y-[11rem]", 
+      "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2", // Center positioning
+      "-rotate-[5deg] scale-95", // Initial rotation
+      "group-hover:rotate-[-15deg] group-hover:scale-100", // Rotation on hover (no translation)
       "z-20", 
-      "border-blue-900/30 bg-gray-950/80 backdrop-blur-md" 
+      "border-blue-900/30 bg-gray-950/80 backdrop-blur-md shadow-lg",
+      "h-auto", // Allow height to adjust based on content
+      "transition-all duration-500 ease-in-out" // Smoother transition
     ),
   },
-  { // Card 1 (Front - Closest to corner)
+  { // Card 1 (Front)
     icon: <BrainCircuit className="w-5 h-5 text-purple-300" />, 
-    title: "Team Collaboration",
-    description: "Share reports and chats with your team or client to ensure everyone is aligned on the next steps. Collaborate effectively to build out what you need to get into the ITT Incubator or even re-thinking square one.",
-    date: "Readiness Assessment", 
+    title: "Collaboration Tools",
+    // Screenshot example
+    description: (
+      <div className="w-full h-32 relative overflow-hidden rounded-md">
+        <Image 
+          src="/images/collaboration-example.png" // This is the image path
+          alt="Team Collaboration Interface"
+          fill
+          className="object-contain"
+        />
+      </div>
+    ),
     iconBgClassName: "bg-purple-600/20", 
     titleClassName: "text-purple-400", 
+    date: null,
     className: cn(
-      "absolute bottom-0 right-0", // Anchor bottom-right
-      // Initial State: Minimal offset/rotation
-      "rotate-[0deg] translate-x-0 translate-y-0", 
-      // Hover State: Lift slightly
-      "group-hover:-translate-y-[1rem]", 
+      "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2", // Center positioning
+      "rotate-[0deg] scale-100", // Initial rotation
+      "group-hover:rotate-[10deg] group-hover:scale-105", // Rotation on hover (no translation)
       "z-30", 
-      "border-purple-900/30 bg-gray-950/80 backdrop-blur-md" 
+      "border-purple-900/30 bg-gray-950/80 backdrop-blur-md shadow-lg",
+      "h-auto", // Allow height to adjust based on content
+      "transition-all duration-500 ease-in-out" // Smoother transition
     ),
   },
 ];
 
 export function ITTSuiteCardsFeature() { 
   return (
-    // --- MODIFIED: Container alignment ---
-    <div className="flex w-full items-end justify-end py-8 pr-8 min-h-[36rem]"> 
-      {/* Container: group, relative, explicit height/width */}
-      <div className="group w-full max-w-md relative h-[32rem]"> 
+    <div className="flex w-full items-center justify-center py-16 min-h-[32rem]"> 
+      {/* Modified container to center cards better */}
+      <div className="group relative w-full max-w-md h-[32rem] perspective-1000"> 
         <DisplayCards cards={ittSuiteCards} /> 
       </div>
     </div>

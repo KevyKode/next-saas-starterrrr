@@ -23,8 +23,8 @@ export function GlowingEffectDemo() {
       <GridItem
         area="md:[grid-area:2/1/3/7] xl:[grid-area:1/5/3/8]"
         icon={<Lock className="h-6 w-6" />}
-        title="Innovator Assistant"
-        description="Figure out the finer details with the Innovator Assistant, our intelligent chatbot. This tool helps you understand your report, take actionable steps, and guides you through the process using advanced reasoning and support. Whether it’s forming ad campaigns or testing baseline ideas, the Innovator Assistant is here to help."
+        title="Innovator AI Assistant"
+        description="Figure out the finer details with the Innovator AI Assistant, our intelligent chatbot. This tool helps you understand your report, take actionable steps, and guides you through the process using advanced reasoning and support. Whether it’s forming ad campaigns or testing baseline ideas, the Innovator AI Assistant is here to help."
       />
     </ul>
   );

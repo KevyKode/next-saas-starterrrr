@@ -1,6 +1,4 @@
 // File: components/landing-page/timeline/components/display-cards.tsx
-// NO CHANGES NEEDED from the previous version
-
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -11,8 +9,8 @@ export interface DisplayCardProps {
   className?: string;
   icon?: React.ReactNode;
   title?: string;
-  description?: string;
-  date?: string;
+  description?: React.ReactNode; // Changed from string to ReactNode
+  date?: string | null;
   iconClassName?: string; 
   titleClassName?: string; 
   iconBgClassName?: string; 
@@ -31,32 +29,36 @@ export function DisplayCard({
   return (
     <div
       className={cn(
-        "absolute flex h-64 w-[28rem] select-none flex-col justify-between rounded-xl p-6 origin-bottom", // Use absolute positioning base
+        "absolute flex h-auto w-[28rem] select-none flex-col justify-between rounded-xl p-6 origin-bottom", 
         "border border-gray-700/50 bg-gray-950/80 backdrop-blur-md shadow-xl", 
-        "transition-all duration-300 ease-out", // Ensure transition is set
+        "transition-all duration-300 ease-out",
         "hover:border-purple-500/50", 
         "[&>div]:flex [&>div]:items-center [&>div]:gap-3", 
-        className // Apply positioning, rotation, z-index, and hover effects from props
+        className
       )}
     >
-     {/* Card content */}
       <div>
         <span className={cn("relative inline-block rounded-full p-2", iconBgClassName )}>{icon}</span>
         <p className={cn("text-lg font-semibold", titleClassName)}>{title}</p> 
       </div>
-      <p className="whitespace-nowrap text-base text-gray-300">{description}</p> 
-      <p className="text-sm text-gray-500">{date}</p> 
+      
+      {/* Handle both string and ReactNode descriptions */}
+      {typeof description === 'string' ? (
+        <p className="text-base text-gray-300">{description}</p>
+      ) : (
+        <div className="w-full">{description}</div>
+      )}
+      
+      {date !== null && <p className="text-sm text-gray-500">{date}</p>}
     </div>
   );
 }
 
-// DisplayCards container is now just a wrapper
 export function DisplayCards({ cards }: { cards?: DisplayCardProps[] }) {
   if (!cards || cards.length === 0) {
     return null; 
   }
   return (
-    // This div doesn't need grid layout anymore
     <> 
       {cards?.map((cardProps, index) => (
         <DisplayCard key={index} {...cardProps} />

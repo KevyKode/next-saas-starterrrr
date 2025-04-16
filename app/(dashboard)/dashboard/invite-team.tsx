@@ -74,7 +74,7 @@ export function InviteTeamMember() {
           )}
           <Button
             type="submit"
-            className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500"
+            className="bg-gradient-to-r from-[#6e3bff] to-[#ffffff] hover:from-[#5c32d6] hover:to-[#f0f0ff] text-white hover:text-white shadow-md hover:shadow-purple-400/20 border-0"
             disabled={isInvitePending || !isOwner}
           >
             {isInvitePending ? (

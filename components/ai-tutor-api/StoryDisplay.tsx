@@ -16,6 +16,11 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
     const reportRef = useRef<HTMLDivElement>(null);
     const printFrameRef = useRef<HTMLIFrameElement | null>(null);
 
+    // NEW HELPER FUNCTION: Clean text by removing all ** markers
+    const cleanAsterisks = (text: string): string => {
+        return text.replace(/\*\*/g, '');
+    };
+
     useEffect(() => {
         console.log('StoryDisplay received result:', result);
         
@@ -31,7 +36,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
                 } else if (result && typeof result === 'object') {
                     rawContent = JSON.stringify(result, null, 2);
                     
-                    if (rawContent.includes("Readiness Report") || 
+                    if (rawContent.includes("ITT Assessment") || 
                         rawContent.includes("Problem-Solution Fit") || 
                         rawContent.includes("Market Opportunity")) {
                         rawContent = rawContent;
@@ -44,7 +49,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
                 const sections = extractSections(rawContent);
                 
                 // Extract score from the content
-                const scoreMatch = rawContent.match(/Readiness Score:?\s*([^\n]+)/);
+                const scoreMatch = rawContent.match(/Assessment Score:?\s*([^\n]+)/);
                 if (scoreMatch && scoreMatch[1]) {
                     let cleanedScore = scoreMatch[1].trim()
                         .replace(/\*\*/g, '')
@@ -88,21 +93,27 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
             const sectionName = match[1].trim();
             const score = match[2];
             const maxScore = match[3];
-            const sectionContent = match[4].trim();
+            let sectionContent = match[4].trim();
+            
+            // MODIFIED: Clean the section content of ** markers
+            sectionContent = cleanAsterisks(sectionContent);
             
             // Extract subsections
             const subsections: any = {};
             
             // Get all lines that aren't recommendations
             const contentLines = sectionContent.split('\n').filter(line => 
-                !line.trim().startsWith('**Recommendations:**') && 
+                !line.trim().startsWith('Recommendations:') && 
                 !line.trim().startsWith('-')
             );
             
             // Extract recommendation lines
             const recommendationLines = sectionContent.split('\n')
                 .filter(line => line.trim().startsWith('-'))
-                .map(line => line.replace(/^-\s*/, '').trim());
+                .map(line => {
+                    // MODIFIED: Clean each recommendation of ** markers
+                    return cleanAsterisks(line.replace(/^-\s*/, '').trim());
+                });
             
             // Store in the section
             sections[sectionName] = {
@@ -116,8 +127,11 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
         // Extract conclusion
         const conclusionMatch = content.match(/\*\*Conclusion\*\*\s*([\s\S]*?)(?=---|$)/);
         if (conclusionMatch) {
+            // MODIFIED: Clean the conclusion content of ** markers
+            let conclusionContent = cleanAsterisks(conclusionMatch[1].trim());
+            
             sections['Conclusion'] = {
-                content: conclusionMatch[1].trim(),
+                content: conclusionContent,
                 recommendations: []
             };
         }
@@ -131,13 +145,16 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
         
         // Process each section
         Object.entries(sections).forEach(([name, data]: [string, any]) => {
-            if (name === 'Conclusion') {
+            // MODIFIED: Clean section name of any remaining ** markers
+            const cleanName = cleanAsterisks(name);
+            
+            if (cleanName === 'Conclusion') {
                 html += `
                     <div class="mt-8">
                         <h2 class="text-xl font-bold mb-4 text-purple-400 flex items-center border-b border-purple-800/30 pb-2">
                             <span class="mr-2">◆</span>Conclusion
                         </h2>
-                        <div class="text-gray-300">${data.content}</div>
+                        <div class="text-gray-300">${cleanAsterisks(data.content)}</div>
                     </div>
                 `;
                 return;
@@ -146,9 +163,9 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
             html += `
                 <div class="mt-8">
                     <h2 class="text-xl font-bold mb-4 text-purple-400 flex items-center border-b border-purple-800/30 pb-2">
-                        <span class="mr-2">◆</span>${name} <span class="ml-2 text-sm font-semibold bg-purple-900/40 text-purple-300 px-2 py-0.5 rounded-full">(${data.score}/${data.maxScore})</span>
+                        <span class="mr-2">◆</span>${cleanName} <span class="ml-2 text-sm font-semibold bg-purple-900/40 text-purple-300 px-2 py-0.5 rounded-full">(${data.score}/${data.maxScore})</span>
                     </h2>
-                    <div class="text-gray-300">${data.content}</div>
+                    <div class="text-gray-300">${cleanAsterisks(data.content)}</div>
                 `;
             
             // Only add recommendations section if there are any
@@ -163,10 +180,11 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
                 
                 // Add each recommendation as a properly styled list item
                 data.recommendations.forEach((rec: string) => {
+                    // MODIFIED: Clean each recommendation again to be doubly sure
                     html += `
                         <li class="flex items-start mb-2">
                             <span class="text-purple-400 flex-shrink-0 mr-2 mt-1">•</span>
-                            <span class="flex-1">${rec}</span>
+                            <span class="flex-1">${cleanAsterisks(rec)}</span>
                         </li>
                     `;
                 });
@@ -198,7 +216,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
                             <span className="text-white font-bold text-lg">ITT</span>
                         </div>
                         <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">
-                            Business Readiness Report
+                            ITT Assessment Report 
                         </h1>
                     </div>
                     
@@ -232,8 +250,8 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
             {/* Report actions footer */}
             <div className="mt-10 pt-6 border-t border-purple-800/30 flex justify-between items-center">
                 <div>
-                    <p className="text-sm text-gray-400">Powered by ITT Innovator Suite™</p>
-                    <p className="text-xs text-gray-500 mt-1">Confidential business intelligence report</p>
+                    <p className="text-sm text-gray-400">Powered by Innovators Think Tank™</p>
+                    <p className="text-xs text-gray-500 mt-1">Confidential business assessment report</p>
                 </div>
                 <div>
                     {/* Download PDF button */}

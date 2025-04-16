@@ -1,50 +1,42 @@
-// src/app/api/chat/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+// app/api/get-token/route.ts
+import { NextResponse } from 'next/server';
 
-export async function POST(req: NextRequest) {
+export async function GET() {
   try {
-    const body = await req.json();
-    const { messages } = body;
+    // Updated to use the correct env variable name
+    const apiKey = process.env.AITUTOR_API_KEY;
+    const chatbotId = process.env.CHATBOT_ID || 'cb_va9j8g2v7t8b0z7ev0lwy7a';
     
-    const token = process.env.NEXT_PUBLIC_AITUTOR_TOKEN;
+    console.log(`Getting token for chatbot ID: ${chatbotId}`);
     
-    const response = await fetch(
-      `https://aitutor-api.vercel.app/api/v1/chat/${token}/stream`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.AITUTOR_API_KEY}`,
-        },
-        body: JSON.stringify({ messages }),
-      }
-    );
-
-    // Create a new TransformStream for streaming
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-
-    const stream = new TransformStream({
-      async transform(chunk, controller) {
-        const text = decoder.decode(chunk);
-        controller.enqueue(encoder.encode(text));
-      },
-    });
-
-    // Pipe the response to our stream
-    response.body?.pipeTo(stream.writable);
-
-    return new NextResponse(stream.readable, {
+    const response = await fetch('https://aitutor-api.vercel.app/api/v1/chat/token', {
+      method: 'POST',
       headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey || '',
       },
+      body: JSON.stringify({
+        chatbotId: chatbotId,
+      }),
     });
+
+    console.log(`Token API response status: ${response.status}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Token API error:', errorText);
+      return NextResponse.json(
+        { error: `Failed to get token: ${errorText}` },
+        { status: response.status }
+      );
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
   } catch (error) {
-    console.error('Streaming API Error:', error);
+    console.error('Token API error:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
