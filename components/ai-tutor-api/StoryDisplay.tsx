@@ -201,9 +201,172 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ result }) => {
         return html;
     };
 
-    // Generate PDF function (unchanged)
+    // Generate PDF function - browser-based approach
     const generatePDF = () => {
-        // Same implementation as before...
+        if (!reportRef.current) return;
+        
+        try {
+            setIsPrinting(true);
+            
+            // Create a hidden iframe for printing
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'absolute';
+            iframe.style.top = '-9999px';
+            iframe.style.left = '-9999px';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            document.body.appendChild(iframe);
+            
+            // Setup iframe content with our report
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (!iframeDoc) {
+                throw new Error('Could not access iframe document');
+            }
+            
+            // Get date for filename
+            const date = new Date().toISOString().split('T')[0];
+            
+            // Write content to iframe
+            iframeDoc.open();
+            iframeDoc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>ITT Assessment Report ${date}</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif;
+                            background-color: #111827;
+                            color: #e5e7eb;
+                            padding: 20px;
+                        }
+                        .report-container {
+                            max-width: 800px;
+                            margin: 0 auto;
+                            background: linear-gradient(to bottom, #111827, #0f172a);
+                            border: 1px solid rgba(124, 58, 237, 0.3);
+                            border-radius: 12px;
+                            padding: 30px;
+                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+                        }
+                        .header {
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 20px;
+                        }
+                        .logo {
+                            width: 40px; 
+                            height: 40px;
+                            background: linear-gradient(to bottom right, #8b5cf6, #6366f1);
+                            border-radius: 8px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-weight: bold;
+                            color: white;
+                            margin-right: 12px;
+                        }
+                        h1 {
+                            background: linear-gradient(to right, #a78bfa, #818cf8);
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            font-size: 28px;
+                            margin: 0;
+                        }
+                        .score-display {
+                            display: inline-block;
+                            background-color: rgba(124, 58, 237, 0.2);
+                            padding: 4px 12px;
+                            border-radius: 9999px;
+                            border: 1px solid rgba(124, 58, 237, 0.3);
+                            margin-top: 10px;
+                        }
+                        .section {
+                            margin-top: 30px;
+                        }
+                        .section-header {
+                            color: #a78bfa;
+                            font-size: 20px;
+                            font-weight: bold;
+                            border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+                            padding-bottom: 8px;
+                            margin-bottom: 15px;
+                        }
+                        .section-score {
+                            display: inline-block;
+                            background-color: rgba(124, 58, 237, 0.2);
+                            padding: 2px 8px;
+                            border-radius: 9999px;
+                            font-size: 14px;
+                            margin-left: 8px;
+                        }
+                        .recommendations {
+                            margin-top: 15px;
+                        }
+                        .recommendation-header {
+                            color: #a5b4fc;
+                            font-size: 18px;
+                            font-weight: 600;
+                            margin-bottom: 10px;
+                        }
+                        ul {
+                            padding-left: 20px;
+                        }
+                        li {
+                            margin-bottom: 8px;
+                        }
+                        .summary-box {
+                            background: linear-gradient(to right, rgba(124, 58, 237, 0.1), rgba(99, 102, 241, 0.05));
+                            border-left: 4px solid #8b5cf6;
+                            padding: 20px;
+                            border-radius: 8px;
+                            margin-bottom: 30px;
+                        }
+                        .footer {
+                            margin-top: 40px;
+                            padding-top: 20px;
+                            border-top: 1px solid rgba(124, 58, 237, 0.3);
+                            color: #9ca3af;
+                            font-size: 14px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-container">
+                        ${reportRef.current.innerHTML}
+                    </div>
+                </body>
+                </html>
+            `);
+            iframeDoc.close();
+            
+            // Add load handler for iframe
+            iframe.onload = () => {
+                try {
+                    setTimeout(() => {
+                        // Print the iframe content
+                        iframe.contentWindow?.focus();
+                        iframe.contentWindow?.print();
+                        
+                        // Clean up after printing dialog closes
+                        setTimeout(() => {
+                            document.body.removeChild(iframe);
+                            setIsPrinting(false);
+                        }, 1000);
+                    }, 500);
+                } catch (error) {
+                    console.error('Print error:', error);
+                    document.body.removeChild(iframe);
+                    setIsPrinting(false);
+                    alert('Failed to generate PDF. Please try again.');
+                }
+            };
+            
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            setIsPrinting(false);
+            alert('There was an error generating the PDF. Please try again.');
+        }
     };
 
     return (
